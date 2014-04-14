@@ -5,13 +5,12 @@ static gboolean exit_thread, candidate_gathering_done, negotiation_done;
 static const gchar *candidate_type_name[] = {"host", "srflx", "prflx", "relay"};
 static const gchar *state_name[] = {"disconnected", "gathering", "connecting",
                                     "connected", "ready", "failed"};
-guint stream_id;
-
-GThread* connectThread;
-GMutex *mutex;
-GCond *cond;
-gchar *mInfo;
-gboolean stopThread;
+static GThread* connectThread;
+static GMutex *mutex;
+static GCond *cond;
+static gchar *mInfo_Text;
+static gchar *AndroidInfo_Text;
+static gboolean stopThread;
 static int flag_trans=0;
 static gboolean hasdata = FALSE;
 
@@ -92,14 +91,17 @@ static void  _text_receive_cb_candidate_gathering_done(NiceAgent *agent, guint s
 		usleep(10000);
 	}
 
-
-	rval = _text_receive_parse_remote_data(agent, stream_id, 1, mInfo);
-	if (rval == EXIT_SUCCESS) {
+	printf("[text] AndroidInfo_Text = %s", AndroidInfo_Text);
+	rval = _text_receive_parse_remote_data(agent, stream_id, 1, AndroidInfo_Text);
+	if (rval == EXIT_SUCCESS)
+	{
 		// Return FALSE so we stop listening to stdin since we parsed the
 		// candidates correctly
 		ret = FALSE;
 		g_debug("waiting for state READY or FAILED signal...");
-	} else {
+	}
+	else
+	{
 		fprintf(stderr, "ERROR: failed to parse remote data\n");
 		printf("Enter remote data (single line, no wrapping):\n");
 		printf("> ");
@@ -125,10 +127,10 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 	if (cands == NULL)
 		goto end;
 
-	mInfo = (gchar*)malloc(181*sizeof(gchar));
+	mInfo_Text = (gchar*)malloc(181*sizeof(gchar));
 
 	//printf("%s %s", local_ufrag, local_password);
-	sprintf(mInfo, "%s %s", local_ufrag, local_password);
+	sprintf(mInfo_Text, "%s %s", local_ufrag, local_password);
 	for (item = cands; item; item = item->next) {
 		NiceCandidate *c = (NiceCandidate *)item->data;
 
@@ -141,7 +143,7 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 		ipaddr,
 		nice_address_get_port(&c->addr),
 		candidate_type_name[c->type]);*/
-		sprintf(mInfo + strlen(mInfo), " %s,%u,%s,%u,%s",
+		sprintf(mInfo_Text + strlen(mInfo_Text), " %s,%u,%s,%u,%s",
 		c->foundation,
 		c->priority,
 		ipaddr,
@@ -150,8 +152,8 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 	}
 	printf("\n");
 
-	//printf("\nmInfo:\n");
-	//printf("%s\n", mInfo);
+	//printf("\nmInfo_Text:\n");
+	//printf("%s\n", mInfo_Text);
 	result = EXIT_SUCCESS;
 
 	end:
@@ -177,7 +179,7 @@ static gboolean _text_receive_stdin_remote_info_cb (GIOChannel *source, GIOCondi
 	G_IO_STATUS_NORMAL) {
 
 		// Parse remote candidate list and set it on the agent
-		rval = _text_receive_parse_remote_data(agent, stream_id, 1, line);
+		rval = _text_receive_parse_remote_data(agent, RpiData_Text->streamID, 1, line);
 		if (rval == EXIT_SUCCESS) {
 			// Return FALSE so we stop listening to stdin since we parsed the
 			// candidates correctly
@@ -277,7 +279,7 @@ static NiceCandidate* _text_receive_parse_candidate(char *scand, guint streamID)
 
 	cand = nice_candidate_new(ntype);
 	cand->component_id = 1;
-	cand->stream_id = stream_id;
+	cand->stream_id = streamID;
 	cand->transport = NICE_CANDIDATE_TRANSPORT_UDP;
 	strncpy(cand->foundation, tokens[0], NICE_CANDIDATE_MAX_FOUNDATION);
 	cand->priority = atoi (tokens[1]);
@@ -300,7 +302,7 @@ static NiceCandidate* _text_receive_parse_candidate(char *scand, guint streamID)
 static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint stream_id,
     guint component_id, guint state, gpointer data)
 {
-	g_debug("SIGNAL: state changed %d %d %s[%d]\n",
+	printf ("SIGNAL: state changed %d %d %s[%d]\n",
 	stream_id, component_id, state_name[state], state);
 
 	if (state == NICE_COMPONENT_STATE_READY) {
@@ -334,16 +336,22 @@ static gboolean _text_receive_stdin_send_data_cb (GIOChannel *source, GIOConditi
 	NiceAgent *agent = data;
 	gchar *line = NULL;
 
-	if (g_io_channel_read_line (source, &line, NULL, NULL, NULL) ==
-	G_IO_STATUS_NORMAL) {
-	nice_agent_send(agent, stream_id, 1, strlen(line), line);
-	g_free (line);
-	printf("> ");
-	fflush (stdout);
-	} else {
-	nice_agent_send(agent, stream_id, 1, 1, "\0");
-	// Ctrl-D was pressed.
-	g_main_loop_quit (gloop);
+	if (g_io_channel_read_line (source, &line, NULL, NULL, NULL) == G_IO_STATUS_NORMAL)
+	{
+		printf ("Read stdin good\n");
+		printf ("AndroidInfo_Text = %s\nagent = %d\nstream_id = %d\nline = %s\n", AndroidInfo_Text, agent, RpiData_Text->streamID, line);
+		int myret = nice_agent_send(agent, RpiData_Text->streamID, 1, strlen(line), line);
+		printf ("myret = %d\n", myret);
+		g_free (line);
+		printf("> ");
+		fflush (stdout);
+	}
+	else
+	{
+		printf ("Read stdin failed\n");
+		nice_agent_send(agent, RpiData_Text->streamID, 1, 1, "\0");
+		// Ctrl-D was pressed.
+		g_main_loop_quit (gloop);
 	}
 
 	return TRUE;
@@ -378,7 +386,7 @@ static int _text_receive_ClientThread()
 	int rc = 0;
 
 	// Send ice ifo to android
-	memcpy(temp,mInfo,sizeof(temp));
+	memcpy(temp,mInfo_Text,sizeof(temp));
 	sprintf(combine,"002$%s$%s$%s",destBuf,originBuf,temp);
 	rc = Base64Encode(combine, sender, BUFFFERLEN);
 	send(global_socket,sender,181,NULL);
@@ -409,7 +417,8 @@ static int _text_receive_ClientThread()
 
 		if(!strcmp(header,"002"))
 		{
-			memcpy(mInfo,temp1,sizeof(temp1));
+			AndroidInfo_Text = (gchar*)malloc(sizeof(gchar)*181);
+			memcpy(AndroidInfo_Text, temp1, sizeof(temp1));
 			flag_trans = 1;
 			return 0;
 		}

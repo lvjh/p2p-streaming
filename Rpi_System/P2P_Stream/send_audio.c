@@ -11,11 +11,12 @@ static gboolean exit_thread, candidate_gathering_done, negotiation_done;
 static const gchar *candidate_type_name[] = {"host", "srflx", "prflx", "relay"};
 static const gchar *state_name[] = {"disconnected", "gathering", "connecting",
                                     "connected", "ready", "failed"};
-GThread* connectThread;
-GMutex *mutex;
-GCond *cond;
-gchar *mInfo;
-gboolean stopThread;
+static GThread* connectThread;
+static GMutex *mutex;
+static GCond *cond;
+static gchar *mInfo_SendAudio;
+static gchar *AndroidInfo_SendAudio;
+static gboolean stopThread;
 static int flag_trans=0;
 static gboolean hasdata = FALSE;
 
@@ -169,7 +170,7 @@ void  _send_audio_cb_candidate_gathering_done(NiceAgent *agent, guint stream_id,
 		usleep(10000);
 	}
 
-	rval = _send_audio_parse_remote_data(agent, stream_id, 1, mInfo);
+	rval = _send_audio_parse_remote_data(agent, stream_id, 1, AndroidInfo_SendAudio);
 	if (rval == EXIT_SUCCESS) {
 		// Return FALSE so we stop listening to stdin since we parsed the
 		// candidates correctly
@@ -201,10 +202,10 @@ int  _send_audio_print_local_data(NiceAgent *agent, guint stream_id, guint compo
 	if (cands == NULL)
 	goto end;
 
-	mInfo = (gchar*)malloc(181*sizeof(gchar));
+	mInfo_SendAudio = (gchar*)malloc(181*sizeof(gchar));
 
 	//printf("%s %s", local_ufrag, local_password);
-	sprintf(mInfo, "%s %s", local_ufrag, local_password);
+	sprintf(mInfo_SendAudio, "%s %s", local_ufrag, local_password);
 	for (item = cands; item; item = item->next) {
 	NiceCandidate *c = (NiceCandidate *)item->data;
 
@@ -217,7 +218,7 @@ int  _send_audio_print_local_data(NiceAgent *agent, guint stream_id, guint compo
 		ipaddr,
 		nice_address_get_port(&c->addr),
 		candidate_type_name[c->type]);*/
-		sprintf(mInfo + strlen(mInfo), " %s,%u,%s,%u,%s",
+		sprintf(mInfo_SendAudio + strlen(mInfo_SendAudio), " %s,%u,%s,%u,%s",
 		c->foundation,
 		c->priority,
 		ipaddr,
@@ -226,8 +227,8 @@ int  _send_audio_print_local_data(NiceAgent *agent, guint stream_id, guint compo
 	}
 	printf("\n");
 
-	//printf("\nmInfo:\n");
-	//printf("%s\n", mInfo);
+	//printf("\nmInfo_SendAudio:\n");
+	//printf("%s\n", mInfo_SendAudio);
 	result = EXIT_SUCCESS;
 
 	end:
@@ -365,7 +366,7 @@ static int _send_audio_ClientThread()
 		int rc = 0;
 
 		// Send ice ifo to android
-		memcpy(temp,mInfo,sizeof(temp));
+		memcpy(temp,mInfo_SendAudio,sizeof(temp));
 		sprintf(combine,"002$%s$%s$%s",destBuf,originBuf,temp);
 		rc = Base64Encode(combine, sender, BUFFFERLEN);
 		send(global_socket,sender,181,NULL);
@@ -396,7 +397,8 @@ static int _send_audio_ClientThread()
 
 			if(!strcmp(header,"002"))
 			{
-				memcpy(mInfo,temp1,sizeof(temp1));
+				AndroidInfo_SendAudio = (gchar*)malloc(sizeof(gchar)*181);
+				memcpy(AndroidInfo_SendAudio, temp1, sizeof(temp1));
 				flag_trans = 1;
 				return 0;
 			}

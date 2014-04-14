@@ -6,15 +6,16 @@ static gboolean exit_thread, candidate_gathering_done, negotiation_done;
 static const gchar *candidate_type_name[] = {"host", "srflx", "prflx", "relay"};
 static const gchar *state_name[] = {"disconnected", "gathering", "connecting",
                                     "connected", "ready", "failed"};
-guint stream_id;
-NiceAgent *agent;
-GThread* connectThread;
-GMutex *mutex;
-GCond *cond;
-gchar *mInfo;
+static guint stream_id;
+static NiceAgent *agent;
+static GThread* connectThread;
+//GMutex *mutex;
+//GCond *cond;
+static gchar *mInfo_Text;
+static gchar rpiInfo_Text[181] = {'\0'};
 gboolean stopThread;
 static int flag_trans=0;
-static gboolean hasdata = FALSE;
+//static gboolean hasdata = FALSE;
 
 static gchar data_buf[512] = {0};
 static int data_len = 0;
@@ -90,7 +91,8 @@ static void  _text_receive_cb_candidate_gathering_done(NiceAgent *agent, guint s
 		usleep(10000);
 	}
 
-	rval = _text_receive_parse_remote_data(agent, stream_id, 1, mInfo);
+	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "[TEXT] rpiInfo_Text = %s\n", rpiInfo_Text);
+	rval = _text_receive_parse_remote_data(agent, stream_id, 1, rpiInfo_Text);
 	if (rval == EXIT_SUCCESS) {
 		// Return FALSE so we stop listening to stdin since we parsed the
 		// candidates correctly
@@ -122,10 +124,10 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 	if (cands == NULL)
 		goto end;
 
-	mInfo = (gchar*)malloc(181*sizeof(gchar));
+	mInfo_Text = (gchar*)malloc(181*sizeof(gchar));
 
 	printf("%s %s", local_ufrag, local_password);
-	sprintf(mInfo, "%s %s", local_ufrag, local_password);
+	sprintf(mInfo_Text, "%s %s", local_ufrag, local_password);
 	for (item = cands; item; item = item->next) {
 		NiceCandidate *c = (NiceCandidate *)item->data;
 
@@ -146,7 +148,7 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 //				nice_address_get_port(&c->addr),
 //				candidate_type_name[c->type]);
 
-		sprintf(mInfo + strlen(mInfo), " %s,%u,%s,%u,%s",
+		sprintf(mInfo_Text + strlen(mInfo_Text), " %s,%u,%s,%u,%s",
 		c->foundation,
 		c->priority,
 		ipaddr,
@@ -155,8 +157,8 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 	}
 	printf("\n");
 
-	//printf("\nmInfo:\n");
-	//printf("%s\n", mInfo);
+	//printf("\nmInfo_Text:\n");
+	//printf("%s\n", mInfo_Text);
 	result = EXIT_SUCCESS;
 
 	end:
@@ -305,7 +307,7 @@ static NiceCandidate* _text_receive_parse_candidate(char *scand, guint streamID)
 static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint stream_id,
     guint component_id, guint state, gpointer data)
 {
-	g_debug("SIGNAL: state changed %d %d %s[%d]\n",
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "SIGNAL: state changed %d %d %s[%d]\n",
 	stream_id, component_id, state_name[state], state);
 
 	if (state == NICE_COMPONENT_STATE_READY) {
@@ -317,10 +319,10 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 			gchar ipaddr[INET6_ADDRSTRLEN];
 
 			nice_address_to_string(&local->addr, ipaddr);
-			printf("\nNegotiation complete: ([%s]:%d,",
+			__android_log_print (ANDROID_LOG_ERROR, "tutorial-3","\nNegotiation complete: ([%s]:%d,",
 			ipaddr, nice_address_get_port(&local->addr));
 			nice_address_to_string(&remote->addr, ipaddr);
-			printf(" [%s]:%d)\n", ipaddr, nice_address_get_port(&remote->addr));
+			__android_log_print (ANDROID_LOG_ERROR, "tutorial-3"," [%s]:%d)\n", ipaddr, nice_address_get_port(&remote->addr));
 		}
 
 		// Listen to stdin and send data written to it
@@ -328,7 +330,9 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 		//g_io_add_watch(io_stdin, G_IO_IN, _text_receive_stdin_send_data_cb, agent);
 		//printf("> ");
 		//fflush (stdout);
-	} else if (state == NICE_COMPONENT_STATE_FAILED) {
+	} else if (state == NICE_COMPONENT_STATE_FAILED)
+	{
+		__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "[text] NICE_COMPONENT_STATE_FAILED");
 		g_main_loop_quit (gloop);
 	}
 }
@@ -398,7 +402,7 @@ static int _text_receive_ClientThread()
 		char sender[181] = {0};
 		int rc = 0;
 
-		memcpy(temp, mInfo, sizeof(temp));
+		memcpy(temp, mInfo_Text, sizeof(temp));
 
 		// Request to connect Rpi
 		//send(global_socket, "001$ceslab$khtn", 181, NULL);
@@ -421,7 +425,7 @@ static int _text_receive_ClientThread()
 				//					"[VIDEO] data = %s", data);
 				/*if(buffer[0]!='2')
 				 {
-				 memcpy(mInfo,buffer,sizeof(buffer));
+				 memcpy(mInfo_Text,buffer,sizeof(buffer));
 				 flag_trans = 1;
 				 break;
 				 }
@@ -430,7 +434,7 @@ static int _text_receive_ClientThread()
 				/* Receive rpi's info -> send its'info */
 				if (!strcmp(header, "002") && flag < 1) {
 					//cout<<"002";
-					memcpy(mInfo,data,sizeof(data));
+					memcpy(rpiInfo_Text,data,strlen(data));
 					sprintf(combine, "002$%s$%s$%s", dest, init, temp);
 					rc = Base64Encode(combine, sender, BUFFFERLEN);
 					send(global_socket, sender, 181, NULL);

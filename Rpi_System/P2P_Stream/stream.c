@@ -74,6 +74,7 @@ int stream ()
 	/* Free libnice agent & gstreamer pipeline */
 
 	/* Free send video */
+	printf("[stream] Agent = %d!\n", RpiData_SendVideo->agent);
 	g_object_unref(RpiData_SendVideo->agent);
 	gst_object_unref (RpiData_SendVideo->bus);
 	gst_element_set_state (RpiData_SendVideo->pipeline, GST_STATE_NULL);

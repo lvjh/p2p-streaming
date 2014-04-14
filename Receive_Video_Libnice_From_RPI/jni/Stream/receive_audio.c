@@ -14,11 +14,12 @@ static const gchar *candidate_type_name[] = {"host", "srflx", "prflx", "relay"};
 static const gchar *state_name[] = {"disconnected", "gathering", "connecting",
                                     "connected", "ready", "failed"};
 
-GThread* connectThread;
-GMutex *mutex;
-GCond *cond;
-gchar *mInfo;
-gboolean stopThread;
+static GThread* connectThread;
+static GMutex *mutex;
+static GCond *cond;
+static gchar *mInfo_ReceiveAudio;
+static gchar *RpiInfo_ReceiveAudio;
+static gboolean stopThread;
 static int flag_trans=0;
 static gboolean hasdata = FALSE;
 
@@ -161,7 +162,7 @@ void  _receive_audio_cb_candidate_gathering_done(NiceAgent *agent, guint stream_
 		usleep(10000);
 	}
 
-	rval = _receive_audio_parse_remote_data(agent, stream_id, 1, mInfo);
+	rval = _receive_audio_parse_remote_data(agent, stream_id, 1, RpiInfo_ReceiveAudio);
 	if (rval == EXIT_SUCCESS) {
 		// Return FALSE so we stop listening to stdin since we parsed the
 		// candidates correctly
@@ -194,10 +195,10 @@ int  _receive_audio_print_local_data(NiceAgent *agent, guint stream_id, guint co
 	if (cands == NULL)
 		goto end;
 
-	mInfo = (gchar*)malloc(181*sizeof(gchar));
+	mInfo_ReceiveAudio = (gchar*)malloc(181*sizeof(gchar));
 
 	printf("%s %s", local_ufrag, local_password);
-	sprintf(mInfo, "%s %s", local_ufrag, local_password);
+	sprintf(mInfo_ReceiveAudio, "%s %s", local_ufrag, local_password);
 	for (item = cands; item; item = item->next) {
 		NiceCandidate *c = (NiceCandidate *)item->data;
 
@@ -218,7 +219,7 @@ int  _receive_audio_print_local_data(NiceAgent *agent, guint stream_id, guint co
 //						nice_address_get_port(&c->addr),
 //						candidate_type_name[c->type]);
 
-		sprintf(mInfo + strlen(mInfo), " %s,%u,%s,%u,%s",
+		sprintf(mInfo_ReceiveAudio + strlen(mInfo_ReceiveAudio), " %s,%u,%s,%u,%s",
 		c->foundation,
 		c->priority,
 		ipaddr,
@@ -227,8 +228,8 @@ int  _receive_audio_print_local_data(NiceAgent *agent, guint stream_id, guint co
 	}
 	printf("\n");
 
-	//printf("\nmInfo:\n");
-	//printf("%s\n", mInfo);
+	//printf("\nmInfo_ReceiveAudio:\n");
+	//printf("%s\n", mInfo_ReceiveAudio);
 	result = EXIT_SUCCESS;
 
 	end:
@@ -354,7 +355,7 @@ static int _receive_audio_ClientThread()
 			char receiver[181] = {0};
 			char sender[181] = {0};
 			int rc = 0;
-			memcpy(temp, mInfo, sizeof(temp));
+			memcpy(temp, mInfo_ReceiveAudio, sizeof(temp));
 
 			// Request to connect Rpi
 			//send(global_socket, "001$ceslab$khtn", 181, NULL);
@@ -377,7 +378,7 @@ static int _receive_audio_ClientThread()
 					//					"[VIDEO] data = %s", data);
 					/*if(buffer[0]!='2')
 					 {
-					 memcpy(mInfo,buffer,sizeof(buffer));
+					 memcpy(mInfo_ReceiveAudio,buffer,sizeof(buffer));
 					 flag_trans = 1;
 					 break;
 					 }
@@ -388,7 +389,8 @@ static int _receive_audio_ClientThread()
 					/* Receive rpi's info -> send its'info */
 					if (!strcmp(header, "002") && flag < 1) {
 						//cout<<"002";
-						memcpy(mInfo,data,sizeof(data));
+						RpiInfo_ReceiveAudio = (gchar*)malloc(sizeof(gchar)*181);
+						memcpy(RpiInfo_ReceiveAudio, data, strlen(data));
 						sprintf(combine, "002$%s$%s$%s", dest, init, temp);
 						rc = Base64Encode(combine, sender, BUFFFERLEN);
 						send(global_socket, sender, 181, NULL);
