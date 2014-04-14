@@ -280,7 +280,6 @@ gst_nice_sink_change_state (GstElement * element, GstStateChange transition)
       break;
   }
 
-  __android_log_print(ANDROID_LOG_ERROR, "TAG", "state = %d", transition);
   ret = GST_ELEMENT_CLASS (gst_nice_sink_parent_class)->change_state (element,
       transition);
 

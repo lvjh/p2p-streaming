@@ -44,9 +44,7 @@ void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
 /* Check if all conditions are met to report GStreamer as initialized.
  * These conditions will change depending on the application */
 void check_initialization_complete (CustomData *data) {
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 06");
   JNIEnv *env = get_jni_env ();
-  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 07");
   if (!data->initialized && data->native_window && data->main_loop) {
     GST_DEBUG ("Initialization complete, notifying application. native_window:%p main_loop:%p", data->native_window, data->main_loop);
 
@@ -60,7 +58,6 @@ void check_initialization_complete (CustomData *data) {
     }
     data->initialized = TRUE;
   }
-  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 08");
 }
 
 static int connect_to_rpi()
@@ -158,32 +155,34 @@ static int connect_to_rpi()
 
 /* Quit the main loop, remove the native thread and free resources */
  void gst_native_finalize (JNIEnv* env, jobject thiz) {
+	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "1");
   GST_CUSTOM_DATA *app_data;
   app_data->video_receive_data = GET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id);
-
+  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "2");
   if (!app_data) return;
   	  GST_DEBUG ("Quitting main loop...");
-
+  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "3");
   g_main_loop_quit (app_data->video_receive_data->main_loop);
   	  GST_DEBUG ("Waiting for thread to finish...");
-
+  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "4");
   pthread_join (gst_app_thread, NULL);
   	  GST_DEBUG ("Deleting GlobalRef for app object at %p", app_data->video_receive_data->app);
-
+  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "5");
   (*env)->DeleteGlobalRef (env, app_data->video_receive_data->app);
   	  GST_DEBUG ("Freeing CustomData at %p", app_data->video_receive_data);
-
+  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "6");
 
   (*env)->DeleteGlobalRef (env, app_data->send_audio_data->app);
 	  GST_DEBUG ("Freeing CustomData at %p", app_data->send_audio_data);
 
+	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "7");
 	  (*env)->DeleteGlobalRef (env, app_data->receive_audio_data->app);
 	  	  GST_DEBUG ("Freeing CustomData at %p", app_data->receive_audio_data);
-
+	  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "8");
   g_free (app_data);
   SET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id, NULL);
 
-  GST_DEBUG ("Done finalizing");
+  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "9");
 }
 
 
@@ -231,13 +230,10 @@ static int connect_to_rpi()
  void gst_native_surface_init (JNIEnv *env, jobject thiz, jobject surface) {
 	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "native_surface_init start");
 	CustomData *data = GET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id);
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 01");
 	if (!data)
 		return;
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 02");
 	ANativeWindow *new_native_window = ANativeWindow_fromSurface(env, surface);
 	GST_DEBUG ("Received surface %p (native window %p)", surface, new_native_window);
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 03");
 	if (data->native_window)
 	{
 		ANativeWindow_release (data->native_window);
@@ -257,12 +253,10 @@ static int connect_to_rpi()
 			data->initialized = FALSE;
 		}
 	}
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 04");
 	data->native_window = new_native_window;
 
 	check_initialization_complete (data);
 	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "native_surface_init done");
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 05");
 }
 
  void gst_native_surface_finalize (JNIEnv *env, jobject thiz) {

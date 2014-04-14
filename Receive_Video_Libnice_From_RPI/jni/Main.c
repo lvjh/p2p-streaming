@@ -29,15 +29,10 @@ void detach_current_thread (void *env) {
 /* Retrieve the JNI environment for this thread */
 JNIEnv *get_jni_env (void) {
   JNIEnv *env;
-  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 08");
   if ((env = pthread_getspecific (current_jni_env)) == NULL) {
-	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 09");
     env = attach_current_thread ();
-    __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 10");
     pthread_setspecific (current_jni_env, env);
-    __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 11");
   }
-  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug 12");
   return env;
 }
 
