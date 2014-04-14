@@ -25,39 +25,43 @@ on_error_video (GstBus     *bus,
 
 void*  _video_send_main()
 {
-	NiceAgent *agent;
-	guint streamID = 0;
+	printf("[send video]\n");
+	//NiceAgent *agent;
+	//guint streamID = 0;
 
 	//nice_debug_enable(TRUE);
 	/* Init agent */
-	agent = nice_agent_new(g_main_loop_get_context (gloop),
+	RpiData_SendVideo->agent = nice_agent_new(g_main_loop_get_context (gloop),
 	NICE_COMPATIBILITY_RFC5245);
-	if (agent == NULL)
+
+	if (RpiData_SendVideo->agent == NULL)
 		g_error("Failed to create agent");
 
-	g_object_set(G_OBJECT(agent), "stun-server", STUNSR_ADDR, NULL);
-	g_object_set(G_OBJECT(agent), "stun-server-port", STUNSR_PORT, NULL);
-	g_object_set(G_OBJECT(agent), "controlling-mode", CONTROLLING_MODE, NULL);
+	g_object_set(G_OBJECT(RpiData_SendVideo->agent), "stun-server", STUNSR_ADDR, NULL);
+	g_object_set(G_OBJECT(RpiData_SendVideo->agent), "stun-server-port", STUNSR_PORT, NULL);
+	g_object_set(G_OBJECT(RpiData_SendVideo->agent), "controlling-mode", CONTROLLING_MODE, NULL);
 
-	g_signal_connect(G_OBJECT(agent), "candidate-gathering-done",
+	g_signal_connect(G_OBJECT(RpiData_SendVideo->agent), "candidate-gathering-done",
 	G_CALLBACK( _video_send_cb_candidate_gathering_done), NULL);
 
 	//g_signal_connect(G_OBJECT(agent), "new-selected-pair",
 	//G_CALLBACK( _video_receive_cb_new_selected_pair), NULL);
 
-	streamID = nice_agent_add_stream(agent, 1);
-	if (streamID == 0)
+	RpiData_SendVideo->streamID = nice_agent_add_stream(RpiData_SendVideo->agent, 1);
+	if (RpiData_SendVideo->streamID == 0)
 		g_error("Failed to add stream");
 
 	/* Init Gstreamer */
-	_video_send_init_gstreamer(agent, streamID);
+	_video_send_init_gstreamer(RpiData_SendVideo->agent, RpiData_SendVideo->streamID);
 
-	nice_agent_attach_recv(agent, streamID, 1,
+	nice_agent_attach_recv(RpiData_SendVideo->agent, RpiData_SendVideo->streamID, 1,
       	g_main_loop_get_context (gloop), _video_send_cb_nice_recv, NULL);
 
 	/* Start gathering local candidates */
-  	if (!nice_agent_gather_candidates(agent, streamID))
-    		g_error("Failed to start candidate gathering");
+  	if (!nice_agent_gather_candidates(RpiData_SendVideo->agent, RpiData_SendVideo->streamID))
+		g_error("Failed to start candidate gathering");
+
+  	printf("[send video] Start Gathering!\n");
 
 }
 
@@ -73,7 +77,7 @@ on_error_video (GstBus     *bus,
 	  gst_message_parse_error (message, &err, &debug_info);
 	  message_string = g_strdup_printf ("Error received from element %s: %s", GST_OBJECT_NAME (message->src), err->message);
 
-          g_message ("debug_info = %s \n message_string = %s\n", debug_info, message_string);
+	  g_message ("debug_info = %s \n message_string = %s\n", debug_info, message_string);
 	  g_clear_error (&err);
 	  g_free (debug_info);
 	  g_free (message_string);
@@ -81,8 +85,9 @@ on_error_video (GstBus     *bus,
 
 void  _video_send_init_gstreamer(NiceAgent *magent, guint stream_id)
 {
-	GstElement *pipeline, *rpicamsrc, *capsfilter, *h264parse, *rtph264pay, *nicesink;
-	GstBus *bus;
+	//GstElement *pipeline, *rpicamsrc, *capsfilter, *h264parse, *rtph264pay, *nicesink;
+	GstElement *rpicamsrc, *capsfilter, *h264parse, *rtph264pay, *nicesink;
+	//GstBus *bus;
 	GstMessage *msg;
 	GstStateChangeReturn ret;
 
@@ -109,34 +114,39 @@ void  _video_send_init_gstreamer(NiceAgent *magent, guint stream_id)
 	g_object_set (nicesink, "component", 1, NULL);
 
 	/// Create the empty pipeline
-	pipeline = gst_pipeline_new ("test-pipeline");
+	//pipeline = gst_pipeline_new ("test-pipeline");
+	RpiData_SendVideo->pipeline = gst_pipeline_new ("send-video-pipeline");
 
-	if (!pipeline || !rpicamsrc ||!capsfilter || !h264parse || !rtph264pay|| !nicesink) {
-	g_printerr ("Not all elements could be created.\n");
-	return -1;
+	if (!RpiData_SendVideo->pipeline || !rpicamsrc ||!capsfilter || !h264parse || !rtph264pay|| !nicesink)
+	{
+		g_printerr ("Not all elements could be created.\n");
+		return -1;
 	}
 
 	/// Build the pipeline
-	gst_bin_add_many (GST_BIN (pipeline), rpicamsrc, capsfilter, h264parse, rtph264pay, nicesink, NULL);
-	if (gst_element_link_many ( rpicamsrc, capsfilter, h264parse, rtph264pay, nicesink,  NULL) != TRUE) {
-	g_printerr ("Elements could not be linked.\n");
-	gst_object_unref (pipeline);
-	return -1;
+	gst_bin_add_many (GST_BIN (RpiData_SendVideo->pipeline), rpicamsrc, capsfilter, h264parse, rtph264pay, nicesink, NULL);
+	if (gst_element_link_many ( rpicamsrc, capsfilter, h264parse, rtph264pay, nicesink,  NULL) != TRUE)
+	{
+		g_printerr ("Elements could not be linked.\n");
+		gst_object_unref (RpiData_SendVideo->pipeline);
+		return -1;
 	}
 
-	bus = gst_element_get_bus (pipeline);
-  	gst_bus_enable_sync_message_emission (bus);
-  	gst_bus_add_signal_watch (bus);
+	RpiData_SendVideo->bus = gst_element_get_bus (RpiData_SendVideo->pipeline);
+  	gst_bus_enable_sync_message_emission (RpiData_SendVideo->bus);
+  	gst_bus_add_signal_watch (RpiData_SendVideo->bus);
 
-	g_signal_connect (bus, "message::error",
+	g_signal_connect (RpiData_SendVideo->bus, "message::error",
       		(GCallback) on_error_video, NULL);
 
-	/// Start playing
-	ret = gst_element_set_state (pipeline, GST_STATE_PLAYING);
-	if (ret == GST_STATE_CHANGE_FAILURE) {
-	g_printerr ("Unable to set the pipeline to the playing state.\n");
-	gst_object_unref (pipeline);
-	return -1;
+	// Start playing
+	ret = gst_element_set_state (RpiData_SendVideo->pipeline, GST_STATE_PLAYING);
+
+	if (ret == GST_STATE_CHANGE_FAILURE)
+	{
+		g_printerr ("Unable to set the pipeline to the playing state.\n");
+		gst_object_unref (RpiData_SendVideo->pipeline);
+		return -1;
 	}
 
 }
@@ -147,6 +157,7 @@ void  _video_send_cb_candidate_gathering_done(NiceAgent *agent, guint stream_id,
 	int rval;
 	int RetVal = 0;
 	gboolean ret = TRUE;
+	flag_trans = 0;
 
 	// Candidate gathering is done. Send our local candidates on stdout
 	//printf("Copy this line to remote client[Video Send]:\n");
@@ -180,6 +191,7 @@ void  _video_send_cb_candidate_gathering_done(NiceAgent *agent, guint stream_id,
 	}
 
 	video_send_gathering_done = TRUE;
+	printf("[send video] Gathering done!\n");
 }
 
 int  _video_send_print_local_data(NiceAgent *agent, guint stream_id, guint component_id)

@@ -23,42 +23,42 @@ static int _text_receive_ClientThread();
 
 void*  _text_receive_main()
 {
-	NiceAgent *agent;
+	//NiceAgent *agent;
 
 	// Create the nice agent
-	agent = nice_agent_new(g_main_loop_get_context (gloop),
+	RpiData_Text->agent = nice_agent_new(g_main_loop_get_context (gloop),
 		NICE_COMPATIBILITY_RFC5245);
-	if (agent == NULL)
+	if (RpiData_Text->agent == NULL)
 		g_error("Failed to create agent");
 
 	// Set the STUN settings and controlling mode
-	g_object_set(G_OBJECT(agent), "stun-server", STUNSR_ADDR, NULL);
-	g_object_set(G_OBJECT(agent), "stun-server-port", STUNSR_PORT, NULL);
-	g_object_set(G_OBJECT(agent), "controlling-mode", 0, NULL);
+	g_object_set(G_OBJECT(RpiData_Text->agent), "stun-server", STUNSR_ADDR, NULL);
+	g_object_set(G_OBJECT(RpiData_Text->agent), "stun-server-port", STUNSR_PORT, NULL);
+	g_object_set(G_OBJECT(RpiData_Text->agent), "controlling-mode", 0, NULL);
 
 	// Connect to the signals
-	g_signal_connect(G_OBJECT(agent), "candidate-gathering-done",
+	g_signal_connect(G_OBJECT(RpiData_Text->agent), "candidate-gathering-done",
 		G_CALLBACK(_text_receive_cb_candidate_gathering_done), NULL);
-	g_signal_connect(G_OBJECT(agent), "new-selected-pair",
+	g_signal_connect(G_OBJECT(RpiData_Text->agent), "new-selected-pair",
 		G_CALLBACK(_text_receive_cb_new_selected_pair), NULL);
-	g_signal_connect(G_OBJECT(agent), "component-state-changed",
+	g_signal_connect(G_OBJECT(RpiData_Text->agent), "component-state-changed",
 		G_CALLBACK(_text_receive_cb_component_state_changed), NULL);
 
 	// Create a new stream with one component
-	stream_id = nice_agent_add_stream(agent, 1);
-	if (stream_id == 0)
+	RpiData_Text->streamID = nice_agent_add_stream(RpiData_Text->agent, 1);
+	if (RpiData_Text->streamID == 0)
 		g_error("Failed to add stream");
 
 	// Attach to the component to receive the data
 	// Without this call, candidates cannot be gathered
-	nice_agent_attach_recv(agent, stream_id, 1,
+	nice_agent_attach_recv(RpiData_Text->agent, RpiData_Text->streamID, 1,
 		g_main_loop_get_context (gloop), _text_receive_cb_nice_recv, NULL);
 
 	while(receive_audio_gathering_done == FALSE)
 		usleep(100);
 
 	// Start gathering local candidates
-	if (!nice_agent_gather_candidates(agent, stream_id))
+	if (!nice_agent_gather_candidates(RpiData_Text->agent, RpiData_Text->streamID))
 		g_error("Failed to start candidate gathering");
 
 	g_debug("waiting for candidate-gathering-done signal...");
@@ -72,6 +72,7 @@ static void  _text_receive_cb_candidate_gathering_done(NiceAgent *agent, guint s
 	int rval;
 	int RetVal = 0;
 	gboolean ret = TRUE;
+	flag_trans = 0;
 
 	// Candidate gathering is done. Send our local candidates on stdout
 	//printf("Copy this line to remote client[Video Receive]:\n");

@@ -21,11 +21,29 @@ gboolean send_audio_gathering_done;
 gboolean receive_audio_gathering_done;
 gboolean text_gathering_done;
 
+/* Use for free all data after Android exit*/
+typedef struct CustomData {
+
+	NiceAgent *agent;
+	guint streamID;
+	GstElement *pipeline;
+	GstBus *bus;
+
+} Rpi_Data;
+
+Rpi_Data *RpiData_SendVideo;
+Rpi_Data *RpiData_SendAudio;
+Rpi_Data *RpiData_ReceiveAudio;
+Rpi_Data *RpiData_Text;
+
+/* STUN server */
 #define STUNSR_ADDR  "107.23.150.92"
 #define STUNSR_PORT 3478
 #define CONTROLLING_MODE 1
 #define CONTROLLED_MODE 0
 #endif
+
+int stream ();
 
 #ifndef _video_send
 #define _video_send

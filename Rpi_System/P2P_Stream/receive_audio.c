@@ -24,40 +24,40 @@ static void	on_error (GstBus     *bus,
 
 void*  _audio_receive_main()
 {
-	NiceAgent *agent;
-	guint streamID = 0;
+	//NiceAgent *agent;
+	//guint streamID = 0;
 
 	/* Init agent */
-	agent = nice_agent_new(g_main_loop_get_context (gloop),
+	RpiData_ReceiveAudio->agent = nice_agent_new(g_main_loop_get_context (gloop),
 	NICE_COMPATIBILITY_RFC5245);
-	if (agent == NULL)
+	if (RpiData_ReceiveAudio->agent == NULL)
 		g_error("Failed to create agent");
 
-	g_object_set(G_OBJECT(agent), "stun-server", STUNSR_ADDR, NULL);
-	g_object_set(G_OBJECT(agent), "stun-server-port", STUNSR_PORT, NULL);
-	g_object_set(G_OBJECT(agent), "controlling-mode", 1, NULL);
+	g_object_set(G_OBJECT(RpiData_ReceiveAudio->agent), "stun-server", STUNSR_ADDR, NULL);
+	g_object_set(G_OBJECT(RpiData_ReceiveAudio->agent), "stun-server-port", STUNSR_PORT, NULL);
+	g_object_set(G_OBJECT(RpiData_ReceiveAudio->agent), "controlling-mode", 1, NULL);
 
-	g_signal_connect(G_OBJECT(agent), "candidate-gathering-done",
+	g_signal_connect(G_OBJECT(RpiData_ReceiveAudio->agent), "candidate-gathering-done",
 	G_CALLBACK( _audio_receive_cb_candidate_gathering_done), NULL);
 
 	//g_signal_connect(G_OBJECT(agent), "new-selected-pair",
 	//G_CALLBACK( _video_receive_cb_new_selected_pair), NULL);
 
-	streamID = nice_agent_add_stream(agent, 1);
-	if (streamID == 0)
+	RpiData_ReceiveAudio->streamID = nice_agent_add_stream(RpiData_ReceiveAudio->agent, 1);
+	if (RpiData_ReceiveAudio->streamID == 0)
 		g_error("Failed to add stream");
 
 	while(send_audio_gathering_done == FALSE)
 		usleep(100);
 
 	/* Init Gstreamer */
-	_audio_receive_init_gstreamer(agent, streamID);
+	_audio_receive_init_gstreamer(RpiData_ReceiveAudio->agent, RpiData_ReceiveAudio->streamID);
 
 //	nice_agent_attach_recv(agent, streamID, 1,
 //      	g_main_loop_get_context (gloop), _audio_receive_cb_nice_recv, NULL);
 
 	/* Start gathering local candidates */
-  	if (!nice_agent_gather_candidates(agent, streamID))
+  	if (!nice_agent_gather_candidates(RpiData_ReceiveAudio->agent, RpiData_ReceiveAudio->streamID))
     		g_error("Failed to start candidate gathering");
 	printf("[Audio] start gathering\n");
 
@@ -83,8 +83,9 @@ on_error (GstBus     *bus,
 
 void  _audio_receive_init_gstreamer(NiceAgent *magent, guint stream_id)
 {
-	GstElement *pipeline, *nicesrc, *caps, *rtpL16depay, *audioconvert, *autoaudiosink;
-	GstBus *bus;
+	//GstElement *pipeline, *nicesrc, *caps, *rtpL16depay, *audioconvert, *autoaudiosink;
+	GstElement *nicesrc, *caps, *rtpL16depay, *audioconvert, *autoaudiosink;
+	//GstBus *bus;
 	GstMessage *msg;
 	GstStateChangeReturn ret;
 
@@ -105,34 +106,34 @@ void  _audio_receive_init_gstreamer(NiceAgent *magent, guint stream_id)
 	g_object_set (caps, "caps", gst_caps_from_string("application/x-rtp, media=(string)audio, clock-rate=(int)16000, channels=(int)1, payload=(int)96"), NULL);
 
 	/// Create the empty pipeline
-	pipeline = gst_pipeline_new ("test-pipeline");
+	RpiData_ReceiveAudio->pipeline = gst_pipeline_new ("receive-audio-pipeline");
 
-	if (!pipeline || !nicesrc ||!caps || !rtpL16depay || !audioconvert || !autoaudiosink) {
+	if (!RpiData_ReceiveAudio->pipeline || !nicesrc ||!caps || !rtpL16depay || !audioconvert || !autoaudiosink) {
 	g_printerr ("Not all elements could be created.\n");
 	return -1;
 	}
 
 	/// Build the pipeline
-	gst_bin_add_many (GST_BIN (pipeline), nicesrc, caps, rtpL16depay, audioconvert, autoaudiosink, NULL);
+	gst_bin_add_many (GST_BIN (RpiData_ReceiveAudio->pipeline), nicesrc, caps, rtpL16depay, audioconvert, autoaudiosink, NULL);
 	if (gst_element_link_many (nicesrc, caps, rtpL16depay, audioconvert, autoaudiosink,  NULL) != TRUE)
 	{
 	g_printerr ("Elements could not be linked.\n");
-	gst_object_unref (pipeline);
+	gst_object_unref (RpiData_ReceiveAudio->pipeline);
 	return -1;
 	}
 
-	bus = gst_element_get_bus (pipeline);
-  	gst_bus_enable_sync_message_emission (bus);
-  	gst_bus_add_signal_watch (bus);
+	RpiData_ReceiveAudio->bus = gst_element_get_bus (RpiData_ReceiveAudio->pipeline);
+  	gst_bus_enable_sync_message_emission (RpiData_ReceiveAudio->bus);
+  	gst_bus_add_signal_watch (RpiData_ReceiveAudio->bus);
 
-	g_signal_connect (bus, "message::error",
+	g_signal_connect (RpiData_ReceiveAudio->bus, "message::error",
       		(GCallback) on_error, NULL);
 
 	/// Start playing
-	ret = gst_element_set_state (pipeline, GST_STATE_PLAYING);
+	ret = gst_element_set_state (RpiData_ReceiveAudio->pipeline, GST_STATE_PLAYING);
 	if (ret == GST_STATE_CHANGE_FAILURE) {
 	g_printerr ("Unable to set the pipeline to the playing state.\n");
-	gst_object_unref (pipeline);
+	gst_object_unref (RpiData_ReceiveAudio->pipeline);
 	return -1;
 	}
 
@@ -144,6 +145,7 @@ void  _audio_receive_cb_candidate_gathering_done(NiceAgent *agent, guint stream_
 	int rval;
 	int RetVal = 0;
 	gboolean ret = TRUE;
+	flag_trans = 0;
 
 	// Candidate gathering is done. Send our local candidates on stdout
 	//printf("Copy this line to remote client[Video Send]:\n");

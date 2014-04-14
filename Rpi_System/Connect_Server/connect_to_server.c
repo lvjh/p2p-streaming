@@ -141,5 +141,4 @@ int wait_android_request()
 		else
 			return 0;
 	}
-
 }
