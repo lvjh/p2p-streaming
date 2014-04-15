@@ -62,10 +62,10 @@ static JNINativeMethod login_methods[] =
 /* Library initializer */
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", " JNI_OnLoad");
 	JNIEnv *env = NULL;
 
 	java_vm = vm;
-	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "java_vm = %d", java_vm);
 	if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK)
 	{
 		__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Could not retrieve JNIEnv");

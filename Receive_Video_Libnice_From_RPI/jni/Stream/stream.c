@@ -148,37 +148,41 @@ static int connect_to_rpi()
   app_data->video_receive_data->app = (*env)->NewGlobalRef (env, thiz);
   app_data->send_audio_data->app = (*env)->NewGlobalRef (env, thiz);
   app_data->receive_audio_data->app = (*env)->NewGlobalRef (env, thiz);
-
+  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "%d %d %d", app_data->video_receive_data->app,
+		  app_data->send_audio_data->app, app_data->receive_audio_data->app);
   pthread_create (&gst_app_thread, NULL, &app_function, app_data);
   __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "NativeInit done");
 }
 
 /* Quit the main loop, remove the native thread and free resources */
  void gst_native_finalize (JNIEnv* env, jobject thiz) {
-	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "1");
   GST_CUSTOM_DATA *app_data;
+
+  /* close socket */
+  shutdown(global_socket, 2);
+
   app_data->video_receive_data = GET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id);
-  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "2");
+
   if (!app_data) return;
   	  GST_DEBUG ("Quitting main loop...");
-  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "3");
+
   g_main_loop_quit (app_data->video_receive_data->main_loop);
-  	  GST_DEBUG ("Waiting for thread to finish...");
-  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "4");
+  GST_DEBUG ("Waiting for thread to finish...");
+
   pthread_join (gst_app_thread, NULL);
-  	  GST_DEBUG ("Deleting GlobalRef for app object at %p", app_data->video_receive_data->app);
-  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "5");
+	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "Deleting GlobalRef for app object at %p", app_data->video_receive_data->app);
+
   (*env)->DeleteGlobalRef (env, app_data->video_receive_data->app);
-  	  GST_DEBUG ("Freeing CustomData at %p", app_data->video_receive_data);
-  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "6");
+	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "Freeing CustomData at %p", app_data->video_receive_data);
 
-  (*env)->DeleteGlobalRef (env, app_data->send_audio_data->app);
-	  GST_DEBUG ("Freeing CustomData at %p", app_data->send_audio_data);
-
-	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "7");
-	  (*env)->DeleteGlobalRef (env, app_data->receive_audio_data->app);
-	  	  GST_DEBUG ("Freeing CustomData at %p", app_data->receive_audio_data);
-	  	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "8");
+//  (*env)->DeleteGlobalRef (env, app_data->send_audio_data->app);
+//  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "Freeing CustomData at %p", app_data->send_audio_data);
+//
+//  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "7");
+//  (*env)->DeleteGlobalRef (env, app_data->receive_audio_data->app);
+//  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "Freeing CustomData at %p", app_data->receive_audio_data);
+//
+// __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "8");
   g_free (app_data);
   SET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id, NULL);
 

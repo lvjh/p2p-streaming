@@ -14,6 +14,7 @@ public class Login extends Activity{
 	EditText username, pass;
 	Button login;
 	int ret = -1;
+	private String TAG = "P2P_STREAM";
 	
 	private native int nativeLogin(String username, String pass);
 	
@@ -32,17 +33,23 @@ public class Login extends Activity{
 	
 	public void login(View v)
 	{
-		Log.i("TAG", "on click");
+		//long start = System.nanoTime();    
+
+		Log.i("TAG", "Start Login!");
 		ret = nativeLogin(username.getText().toString(), pass.getText().toString());
+		//long elapsedTime = System.nanoTime() - start;
+		
+		//Log.i("TAG", "Elapsed time " + elapsedTime/1000000000);
 		
 		if (ret == 0)
 		{
 			//Toast.makeText(this, "Login success!", Toast.LENGTH_LONG).show();
+			Log.i("TAG", "Login sucess!");
 			Intent intent = new Intent(this, Tutorial3.class);
 			startActivity(intent);
 		}
 		else if (ret == 1)
-			Toast.makeText(this, "Login failed!", Toast.LENGTH_LONG).show();
+			Log.i("TAG", "Login failed!");
 	}	
 	
 	static {
