@@ -139,5 +139,7 @@ int  _audio_receive_print_local_data(NiceAgent *agent, guint stream_id, guint co
 int  _audio_receive_parse_remote_data(NiceAgent *agent, guint streamID,
     guint component_id, char *line);
 NiceCandidate* _audio_receive_parse_candidate(char *scand, guint streamID);
+GThread *sendToAndroid;
+static int send_data_to_android(NiceAgent *agent);
 
 #endif

@@ -144,6 +144,7 @@ void  _receive_audio_cb_candidate_gathering_done(NiceAgent *agent, guint stream_
 	int rval;
 	int RetVal = 0;
 	gboolean ret = TRUE;
+	flag_trans = 0;
 
 	_receive_audio_print_local_data(agent, stream_id, 1);
 
@@ -397,6 +398,7 @@ static int _receive_audio_ClientThread()
 						//cout<<data<<endl<<"Trade completed!"<<endl;
 						flag_trans = 1;
 						flag++;
+						return 0;
 					}
 				}
 
@@ -404,7 +406,7 @@ static int _receive_audio_ClientThread()
 				break;
 			}
 
-			return 0;
+
 }
 
 

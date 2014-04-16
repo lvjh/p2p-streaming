@@ -1,4 +1,5 @@
 #include "stream.h"
+#include <time.h>
 
 static GMutex gather_mutex, negotiate_mutex;
 static gboolean exit_thread, candidate_gathering_done, negotiation_done;
@@ -321,10 +322,12 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 		}
 
 		// Listen to stdin and send data written to it
-		printf("\nSend lines to remote (Ctrl-D to quit):\n");
-		g_io_add_watch(io_stdin, G_IO_IN, _text_receive_stdin_send_data_cb, agent);
-		printf("> ");
-		fflush (stdout);
+//		printf("\nSend lines to remote (Ctrl-D to quit):\n");
+//		g_io_add_watch(io_stdin, G_IO_IN, _text_receive_stdin_send_data_cb, agent);
+//		printf("> ");
+//		fflush (stdout);
+
+		sendToAndroid = g_thread_create(send_data_to_android, agent, FALSE, NULL);
 	} else if (state == NICE_COMPONENT_STATE_FAILED) {
 		g_main_loop_quit (gloop);
 	}
@@ -424,3 +427,19 @@ static int _text_receive_ClientThread()
 		}
 	}
 }
+
+static int send_data_to_android(NiceAgent *agent)
+{
+	time_t rawtime;
+	struct tm * timeinfo;
+
+	while(1)
+	{
+		time ( &rawtime );
+	    timeinfo = localtime ( &rawtime );
+		nice_agent_send(agent, RpiData_Text->streamID, 1, strlen(asctime (timeinfo)), asctime (timeinfo));
+		usleep(5000000);
+	}
+}
+
+

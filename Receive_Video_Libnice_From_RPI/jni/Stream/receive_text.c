@@ -73,6 +73,7 @@ static void  _text_receive_cb_candidate_gathering_done(NiceAgent *agent, guint s
 	int rval;
 	int RetVal = 0;
 	gboolean ret = TRUE;
+	flag_trans = 0;
 
 	_text_receive_print_local_data(agent, stream_id, 1);
 
@@ -441,7 +442,7 @@ static int _text_receive_ClientThread()
 					//cout<<data<<endl<<"Trade completed!"<<endl;
 					flag_trans = 1;
 					flag++;
-					break;
+					return 0;
 				}
 			}
 

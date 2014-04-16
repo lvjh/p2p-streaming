@@ -168,6 +168,7 @@ void  _video_receive_cb_candidate_gathering_done(NiceAgent *agent, guint stream_
 	int rval;
 	int RetVal = 0;
 	gboolean ret = TRUE;
+	flag_trans = 0;
 
 	_video_receive_print_local_data(agent, stream_id, 1);
 
@@ -426,12 +427,11 @@ static int _video_receive_ClientThread()
 					//cout<<data<<endl<<"Trade completed!"<<endl;
 					flag_trans = 1;
 					flag++;
-					break;
+					return 0;
 				}
 			}
 
 			usleep(10000);
 		}
 
-		return 0;
 }
