@@ -24,34 +24,34 @@ static int _video_receive_ClientThread();
 
 void*  _video_receive_main(CustomData *data)
 {
-	NiceAgent *agent;
-	guint streamID = 0;
+	//NiceAgent *agent;
+	//guint streamID = 0;
 	
 	/* Init agent */
-	agent = nice_agent_new(data->context,
+	data->agent = nice_agent_new(data->context,
 	NICE_COMPATIBILITY_RFC5245);
-	if (agent == NULL)
+	if (data->agent == NULL)
 		g_error("Failed to create agent");
 
-	g_object_set(G_OBJECT(agent), "stun-server", STUNSR_ADDR, NULL);
-	g_object_set(G_OBJECT(agent), "stun-server-port", STUNSR_PORT, NULL);
-	g_object_set(G_OBJECT(agent), "controlling-mode", CONTROLLING_MODE, NULL);
+	g_object_set(G_OBJECT(data->agent), "stun-server", STUNSR_ADDR, NULL);
+	g_object_set(G_OBJECT(data->agent), "stun-server-port", STUNSR_PORT, NULL);
+	g_object_set(G_OBJECT(data->agent), "controlling-mode", CONTROLLING_MODE, NULL);
 
-	g_signal_connect(G_OBJECT(agent), "candidate-gathering-done",
+	g_signal_connect(G_OBJECT(data->agent), "candidate-gathering-done",
 	G_CALLBACK( _video_receive_cb_candidate_gathering_done), NULL);
 	
 	//g_signal_connect(G_OBJECT(agent), "new-selected-pair",
 	//G_CALLBACK( _video_receive_cb_new_selected_pair), NULL);
 
-	streamID = nice_agent_add_stream(agent, 1);
-	if (streamID == 0)
+	data->stream_id = nice_agent_add_stream(data->agent, 1);
+	if (data->stream_id == 0)
 		g_error("Failed to add stream");
 	
 	/* Init Gstreamer */
-	_video_receive_init_gstreamer(agent, streamID, data);
+	_video_receive_init_gstreamer(data->agent, data->stream_id, data);
 
 	/* Start gathering local candidates */
-  	if (!nice_agent_gather_candidates(agent, streamID))
+  	if (!nice_agent_gather_candidates(data->agent, data->stream_id))
     		g_error("Failed to start candidate gathering");
   	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "[VIDEO] nice_agent_gather_candidates");
 

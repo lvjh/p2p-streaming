@@ -87,10 +87,12 @@ static int connect_to_rpi()
 	app_data->video_receive_data->context = g_main_context_new ();
 	app_data->send_audio_data->context = app_data->video_receive_data->context;
 	app_data->receive_audio_data->context = app_data->video_receive_data->context;
+	app_data->text->context = app_data->video_receive_data->context;
 	g_main_context_push_thread_default(app_data->video_receive_data->context);
 	app_data->video_receive_data->main_loop = g_main_loop_new (app_data->video_receive_data->context, FALSE);
 	app_data->send_audio_data->main_loop = app_data->video_receive_data->main_loop;
 	app_data->receive_audio_data->main_loop = app_data->video_receive_data->main_loop;
+	app_data->text->main_loop = app_data->video_receive_data->main_loop;
 
 	/* Request to connect Rpi */
 	connect_to_rpi();
@@ -103,26 +105,40 @@ static int connect_to_rpi()
 	video_receive = g_thread_new("video_receive_main", &_video_receive_main, app_data->video_receive_data);
 	receive_audio = g_thread_new("receive audio", &_receive_audio_main, app_data->receive_audio_data);
 	send_audio = g_thread_new("send_audio", &_send_audio_main, app_data->send_audio_data);
-	text_receive = g_thread_new("text_receive_main", &_text_receive_main, app_data->video_receive_data);
+	text_receive = g_thread_new("text_receive_main", &_text_receive_main, app_data->text);
 
 	g_main_loop_run (app_data->video_receive_data->main_loop);
+
+	/* Free resource */
 	g_thread_join (video_receive);
 	g_thread_join (receive_audio);
 	g_thread_join (send_audio);
 	g_thread_join (text_receive);
+
+	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "Quit program");
 	g_main_loop_unref (app_data->video_receive_data->main_loop);
 	app_data->video_receive_data->main_loop = NULL;
-
-	// Free resources
 	g_main_context_pop_thread_default(app_data->video_receive_data->context);
 	g_main_context_unref (app_data->video_receive_data->context);
 
+	/* receive video */
 	gst_element_set_state (app_data->video_receive_data->pipeline, GST_STATE_NULL);
-	gst_element_set_state (app_data->send_audio_data->pipeline, GST_STATE_NULL);
 	gst_object_unref (app_data->video_receive_data->video_sink);
-
 	gst_object_unref (app_data->video_receive_data->pipeline);
+	g_object_unref(app_data->video_receive_data->agent);
+
+	/* receive audio */
+	gst_element_set_state (app_data->receive_audio_data->pipeline, GST_STATE_NULL);
+	gst_object_unref (app_data->receive_audio_data->pipeline);
+	g_object_unref(app_data->receive_audio_data->agent);
+
+	/* send audio */
+	gst_element_set_state (app_data->send_audio_data->pipeline, GST_STATE_NULL);
 	gst_object_unref (app_data->send_audio_data->pipeline);
+	g_object_unref(app_data->send_audio_data->agent);
+
+	/* text */
+	g_object_unref(app_data->text->agent);
 
 	return NULL;
 }
@@ -138,6 +154,7 @@ static int connect_to_rpi()
   app_data->video_receive_data = g_new0 (CustomData, 1);
   app_data->send_audio_data = g_new0 (CustomData, 1);
   app_data->receive_audio_data = g_new0 (CustomData, 1);
+  app_data->text = g_new0 (CustomData, 1);
 
   SET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id, app_data->video_receive_data);
 
@@ -148,6 +165,7 @@ static int connect_to_rpi()
   app_data->video_receive_data->app = (*env)->NewGlobalRef (env, thiz);
   app_data->send_audio_data->app = (*env)->NewGlobalRef (env, thiz);
   app_data->receive_audio_data->app = (*env)->NewGlobalRef (env, thiz);
+  app_data->text->app = (*env)->NewGlobalRef (env, thiz);
   __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "%d %d %d", app_data->video_receive_data->app,
 		  app_data->send_audio_data->app, app_data->receive_audio_data->app);
   pthread_create (&gst_app_thread, NULL, &app_function, app_data);

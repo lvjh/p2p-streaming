@@ -28,39 +28,39 @@ void*  _text_receive_main(CustomData *data)
 {
 	mData = data;
 	// Create the nice agent
-	agent = nice_agent_new(data->context,
+	data->agent = nice_agent_new(data->context,
 		NICE_COMPATIBILITY_RFC5245);
-	if (agent == NULL)
+	if (data->agent == NULL)
 		g_error("Failed to create agent");
 
 	// Set the STUN settings and controlling mode
-	g_object_set(G_OBJECT(agent), "stun-server", STUNSR_ADDR, NULL);
-	g_object_set(G_OBJECT(agent), "stun-server-port", STUNSR_PORT, NULL);
-	g_object_set(G_OBJECT(agent), "controlling-mode", 0, NULL);
+	g_object_set(G_OBJECT(data->agent), "stun-server", STUNSR_ADDR, NULL);
+	g_object_set(G_OBJECT(data->agent), "stun-server-port", STUNSR_PORT, NULL);
+	g_object_set(G_OBJECT(data->agent), "controlling-mode", 0, NULL);
 
 	// Connect to the signals
-	g_signal_connect(G_OBJECT(agent), "candidate-gathering-done",
+	g_signal_connect(G_OBJECT(data->agent), "candidate-gathering-done",
 		G_CALLBACK(_text_receive_cb_candidate_gathering_done), NULL);
-	g_signal_connect(G_OBJECT(agent), "new-selected-pair",
+	g_signal_connect(G_OBJECT(data->agent), "new-selected-pair",
 		G_CALLBACK(_text_receive_cb_new_selected_pair), NULL);
-	g_signal_connect(G_OBJECT(agent), "component-state-changed",
+	g_signal_connect(G_OBJECT(data->agent), "component-state-changed",
 		G_CALLBACK(_text_receive_cb_component_state_changed), NULL);
 
 	// Create a new stream with one component
-	stream_id = nice_agent_add_stream(agent, 1);
-	if (stream_id == 0)
+	data->stream_id = nice_agent_add_stream(data->agent, 1);
+	if (data->stream_id == 0)
 		g_error("Failed to add stream");
 
 	// Attach to the component to receive the data
 	// Without this call, candidates cannot be gathered
-	nice_agent_attach_recv(agent, stream_id, 1,
+	nice_agent_attach_recv(data->agent, data->stream_id, 1,
 		data->context, _text_receive_cb_nice_recv, NULL);
 
 	while(send_audio_gathering_done == FALSE)
 		usleep(100);
 
 	// Start gathering local candidates
-	if (!nice_agent_gather_candidates(agent, stream_id))
+	if (!nice_agent_gather_candidates(data->agent, data->stream_id))
 		g_error("Failed to start candidate gathering");
 
 	g_debug("waiting for candidate-gathering-done signal...");

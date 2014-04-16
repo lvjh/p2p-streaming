@@ -74,13 +74,19 @@ typedef struct _CustomData {
   gboolean initialized;
   GstElement *video_sink;
   ANativeWindow *native_window;
+  GstBus *bus;
+  NiceAgent *agent;
+  guint stream_id;
+
 } CustomData;
 
-typedef struct gstdata {
+typedef struct gst_custom_data {
 	CustomData *video_receive_data;
 	CustomData *receive_audio_data;
-    CustomData *send_audio_data;
-} GST_CUSTOM_DATA;
+	CustomData *send_audio_data;
+	CustomData *text;
+}GST_CUSTOM_DATA;
+
 
 #endif
 
