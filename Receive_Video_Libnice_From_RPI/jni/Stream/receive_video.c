@@ -370,6 +370,17 @@ static NiceCandidate* _video_receive_parse_candidate(char *scand, guint streamID
 	return cand;
 }
 
+static int connect_to_rpi()
+{
+	char sender[181] = {0};
+	int rc;
+
+	rc = Base64Encode("001$ceslab$khtn", sender, BUFFFERLEN);
+
+	send(global_socket, sender, 181, NULL);
+	return 0;
+}
+
 static int _video_receive_ClientThread()
 {
 	char *header, *init, *dest, *data;
@@ -383,6 +394,7 @@ static int _video_receive_ClientThread()
 		int rc = 0;
 
 		memcpy(temp, mInfo_SendVideo, sizeof(temp));
+		connect_to_rpi();
 
 		// Request to connect Rpi
 		//send(global_socket, "001$ceslab$khtn", 181, NULL);

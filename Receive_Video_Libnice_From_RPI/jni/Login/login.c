@@ -93,7 +93,7 @@ int login_to_server(JNIEnv *env, jobject thiz, jstring _username, jstring _passw
 
 	do {
 		ret = connect_with_timeout(SERVER, SERVER_PORT, 5, 0, info);
-		sleep(5);
+		//sleep(5);
 	}while(ret == -1);// Can't connect to server
 
 	if (ret == -2)//login failed

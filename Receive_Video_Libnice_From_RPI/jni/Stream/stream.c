@@ -60,17 +60,6 @@ void check_initialization_complete (CustomData *data) {
   }
 }
 
-static int connect_to_rpi()
-{
-	char sender[181] = {0};
-	int rc;
-
-	rc = Base64Encode("001$ceslab$khtn", sender, BUFFFERLEN);
-
-	send(global_socket, sender, 181, NULL);
-	return 0;
-}
-
 /* Main method for the native code. This is executed on its own thread. */
  void *app_function (void *userdata) {
 	 __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "app_function");
@@ -95,7 +84,7 @@ static int connect_to_rpi()
 	app_data->text->main_loop = app_data->video_receive_data->main_loop;
 
 	/* Request to connect Rpi */
-	connect_to_rpi();
+	//connect_to_rpi();
 
 	/* Gathering flag for each thread */
 	video_receive_gathering_done = FALSE;
@@ -149,6 +138,7 @@ static int connect_to_rpi()
 
 /* Instruct the native code to create its internal data structure, pipeline and thread */
  void gst_native_init (JNIEnv* env, jobject thiz) {
+
   GST_CUSTOM_DATA *app_data;
   app_data = g_new0 (GST_CUSTOM_DATA, 1);
   app_data->video_receive_data = g_new0 (CustomData, 1);
