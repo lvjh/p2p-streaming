@@ -45,14 +45,15 @@ static JNINativeMethod native_methods[] =
   { "nativePause", "()V", (void *) gst_native_pause},
   { "nativeSurfaceInit", "(Ljava/lang/Object;)V", (void *) gst_native_surface_init},
   { "nativeSurfaceFinalize", "()V", (void *) gst_native_surface_finalize},
-  { "nativeClassInit", "()Z", (void *) gst_native_class_init}
+  { "nativeClassInit", "()Z", (void *) gst_native_class_init},
+  { "native_request_servo_rotate", "(I)V", (void *) rotate_servo}
 };
 
-/* List of implemented native methods */
-static JNINativeMethod lnative_methods[] =
-{
-		{ "nativeSendText", "(Ljava/lang/String;)V", (void *) gst_native_send_text}
-};
+///* List of implemented native methods */
+//static JNINativeMethod lnative_methods[] =
+//{
+//		{ "nativeSendText", "(Ljava/lang/String;)V", (void *) gst_native_send_text}
+//};
 
 static JNINativeMethod login_methods[] =
 {
@@ -73,11 +74,11 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 	}
 
 	jclass main_class = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Tutorial3");
-	jclass llass = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Communicate_Rpi");
+	//jclass llass = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Communicate_Rpi");
 	jclass login_class = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Login");
 
 	(*env)->RegisterNatives (env, main_class, native_methods, G_N_ELEMENTS(native_methods));
-	(*env)->RegisterNatives (env, llass, lnative_methods, G_N_ELEMENTS(lnative_methods));
+	//(*env)->RegisterNatives (env, llass, lnative_methods, G_N_ELEMENTS(lnative_methods));
 	(*env)->RegisterNatives (env, login_class, login_methods, G_N_ELEMENTS(login_methods));
 
 	pthread_key_create (&current_jni_env, detach_current_thread);

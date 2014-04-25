@@ -18,22 +18,28 @@ public final class R {
         public static final int button_state=0x7f020004;
         public static final int edittext=0x7f020005;
         public static final int gst_sdk_icon=0x7f020006;
+        public static final int offline=0x7f020007;
+        public static final int online=0x7f020008;
     }
     public static final class id {
         public static final int buttonLogin=0x7f070006;
-        public static final int communicate_rpi=0x7f070008;
+        public static final int communicate_rpi=0x7f07000b;
         public static final int editPassword=0x7f070005;
         public static final int editToRpi=0x7f070001;
         public static final int editUserName=0x7f070004;
+        public static final int headerLinearLay=0x7f070008;
         public static final int send_message=0x7f070002;
+        public static final int status=0x7f070009;
         public static final int surface_video=0x7f070007;
         public static final int textView1=0x7f070000;
         public static final int textView2=0x7f070003;
+        public static final int usernameTextView=0x7f07000a;
     }
     public static final class layout {
         public static final int comunicate_rpi=0x7f030000;
         public static final int login=0x7f030001;
         public static final int main=0x7f030002;
+        public static final int rpi_status=0x7f030003;
     }
     public static final class menu {
         public static final int menu=0x7f060000;

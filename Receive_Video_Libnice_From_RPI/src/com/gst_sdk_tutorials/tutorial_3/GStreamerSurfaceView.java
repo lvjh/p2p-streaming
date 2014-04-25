@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,8 +33,8 @@ public class GStreamerSurfaceView extends SurfaceView {
         super(context);
         mContext = context;
     }
-
-    // Called by the layout manager to find out our size and give us some rules.
+    
+	// Called by the layout manager to find out our size and give us some rules.
     // We will try to maximize our size, and preserve the media's aspect ratio if
     // we are given the freedom to do so.
     @Override

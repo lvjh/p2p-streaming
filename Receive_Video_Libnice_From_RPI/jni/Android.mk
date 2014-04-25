@@ -17,7 +17,7 @@ UTILS := utils
 UTILS_SRC_FILES := $(UTILS)/base64.c
 LOGIN_SRC_FILES := $(LOGIN)/login.c
 GST_LIBNICE_SRC_FILES := $(GST_LIBNICE)/gstnice.c $(GST_LIBNICE)/gstnicesink.c $(GST_LIBNICE)/gstnicesrc.c
-STREAM_SRC_FILES := $(STREAM)/receive_audio.c $(STREAM)/receive_text.c $(STREAM)/receive_video.c \
+STREAM_SRC_FILES := $(STREAM)/receive_audio.c $(STREAM)/controller.c $(STREAM)/receive_video.c \
 					$(STREAM)/send_audio.c $(STREAM)/stream.c
 
 LOCAL_SRC_FILES :=  Main.c $(LOGIN_SRC_FILES) $(GST_LIBNICE_SRC_FILES) $(STREAM_SRC_FILES) $(UTILS_SRC_FILES)

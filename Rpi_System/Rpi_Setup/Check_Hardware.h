@@ -16,6 +16,12 @@
 #define SUCCESS 5
 #define FAILED 6
 
+/* uart */
+typedef struct __rpi_uart
+{
+	int uart_fd;
+}Rpi_Uart;
+
 /* Camera */
 typedef struct __rpi_camera_info
 {
@@ -62,6 +68,7 @@ typedef struct __rpi_hardware_info
 	Rpi_Camera camera;
 	Rpi_Usb_Audio_Adapter audio_adapter;
 	Rpi_Network network;
+	Rpi_Uart uart;
 	//[...]
 
 }Rpi_Hardware;
@@ -85,6 +92,9 @@ int setup_network();
 /* Audio */
 int check_audio ();
 void setup_audio ();
+
+/* Uart */
+void uart_init();
 
 //[...]
 

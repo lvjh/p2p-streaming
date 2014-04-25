@@ -148,6 +148,7 @@ void gst_native_init_receive_text (JNIEnv* env, jobject obj);
 int  _send_audio_parse_remote_data(NiceAgent *agent, guint streamID,
     guint component_id, char *line);
 static NiceCandidate* _send_audio_parse_candidate(char *scand, guint streamID);
+void rotate_servo (JNIEnv* env, jobject thiz, jint direction);
 
 #endif
 

@@ -233,11 +233,27 @@ void setup_audio ()
 	rpi_hardware.audio_adapter.speaker_sample_rate = 16000;
 }
 
+void uart_init ()
+{
+	int uart0_filestream = -1;
+
+	uart0_filestream = open_uart ("/dev/ttyAMA0", 9600);
+
+	if (uart0_filestream == -1)
+	{
+		printf("Error - Unable to open UART\n");
+	}
+
+	rpi_hardware.uart.uart_fd = uart0_filestream;
+	printf("UART is available!\n");
+}
+
 void Rpi_setup ()
 {
 	/* Network */
 	setup_network();
 	setup_camera();
 	setup_audio();
+	uart_init();
 }
 

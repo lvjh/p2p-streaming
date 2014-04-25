@@ -3,8 +3,8 @@ Rpi_Setup: Check_Hardware.o utils.o
 	rm -rf Check_Hardware.o utils.o
 
 Check_Hardware.o:
-	gcc -Wall -c Check_Hardware.c
+	gcc -w -c Check_Hardware.c
 
 utils.o:
-	gcc -Wall -c utils.c
+	gcc -w -c utils.c
 
