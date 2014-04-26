@@ -103,7 +103,6 @@ int rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected)
 		if (rx_length < 0)
 		{
 			printf ("Receive Error,  error = %s\n", strerror(errno));
-		
 		}
 		else if (rx_length == 0)
 		{

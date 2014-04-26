@@ -72,10 +72,10 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
          * Would like rotate 5 dregee a time
          * 
          * => threadHold = screenWidth*5/180
-         * 	  1280x720: threadHold = 35.56
+         * 	  1280x720: threadHold = 35.55
          */
         
-        rotateThreadHold = (screenWidth*5)/180;  
+        rotateThreadHold = (screenWidth)/180;  
         
         
         /* Control camera */
