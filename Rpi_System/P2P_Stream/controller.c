@@ -364,13 +364,15 @@ static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint 
     guint len, gchar *buf, gpointer data)
 {
 	printf ("Receive command!\n");
+
 	if (len == 1 && buf[0] == '\0')
 		g_main_loop_quit (gloop);
 
-	printf("%c %c %d\n", buf[0], buf[1], buf[2]);
+	printf("%c %c %d\n", buf[0], buf[1], buf[2], buf[3]);
 
+	/* Control servo */
 	if (buf[0] == '1')
-		uart_control_servo (buf[1], buf[2]);
+		uart_control_servo (buf[1], buf[2], buf[3]); // servo number[1,2], direction[+,-], degree
 
 	fflush(stdout);
 }

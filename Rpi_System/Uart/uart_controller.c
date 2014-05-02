@@ -6,12 +6,13 @@
 
 void receive_uart_thread(int *pfd);
 
-int uart_control_servo (char direction, int degree)
+int uart_control_servo (int servo_id, char direction, int degree)
 {
-	if (direction == '+')
-		control_servo (rpi_hardware.uart.uart_fd, SERVO_01, degree);
-	else
-		control_servo (rpi_hardware.uart.uart_fd, SERVO_01, degree*(-1));
+		if (direction == '+')
+			control_servo (rpi_hardware.uart.uart_fd, servo_id, degree);
+		else
+			control_servo (rpi_hardware.uart.uart_fd, servo_id, degree*(-1));
+
 
 	printf ("send servo done!\n");
 }

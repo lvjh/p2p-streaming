@@ -20,9 +20,15 @@ static int sConnect;
 CustomData *mData;
 static int _text_receive_ClientThread();
 
+#define SERVO_COMMAND '1'
+#define SERVO_01 1
+#define SERVO_02 2
+#define DEGREE_PER_ROTATE 5
+
 void*  _text_receive_main(CustomData *data)
 {
 	mData = data;
+
 	// Create the nice agent
 	data->agent = nice_agent_new(data->context,
 		NICE_COMPATIBILITY_RFC5245);
@@ -368,23 +374,37 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 
 void rotate_servo (JNIEnv* env, jobject thiz, jint direction)
 {
+	// id [1], servo id[1,2], direction[+,-], dgree, end-of-string
 	 __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Send servo ... !");
 	gchar *command;
-	command = (gchar*)malloc(sizeof(gchar)*4);
-	command[0] = '1';
+	command = (gchar*)malloc(sizeof(gchar)*5);
 
-	if (direction == 0) // right to left
-		command[1] = '+';
-	if (direction == 1) // left to right
-		command[1] = '-';
+	/* Command id */
+	command[0] = SERVO_COMMAND;
 
-	command[2] = 5;
-	command[3] = '\0';
+	/* Servo number */
+	if (direction == 0 || direction == 1 )
+		command[1] = SERVO_01;
+	else if (direction == 2 || direction == 3 )
+		command[1] = SERVO_02;
+
+	/* Direction */
+	if (direction == 0 || direction == 2) // right to left, top to bottom
+		command[2] = '+';
+	if (direction == 1 || direction == 3) // left to right, bottom to top
+		command[2] = '-';
+
+	/* Degree */
+	command[3] = DEGREE_PER_ROTATE;
+	command[4] = '\0';
 
 	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Send servo ... 01 !");
 	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "agent = %d, stream_id = %d, command = %s",
 			mData->agent, mData->stream_id, command);
-	nice_agent_send(mData->agent, mData->stream_id, 1, 4, command);
+
+	/* Send command to RPI */
+	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
+
 	 __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Send servo done!");
 }
 

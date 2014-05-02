@@ -31,9 +31,12 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private long video_receive_native_custom_data;
     private long audio_send_native_custom_data;
     float prevX, prevY, totalX = 0, totalY = 0, distance;
-    int rotateThreadHold, angle;
+    private int rotateThreadHoldX, rotateThreadHoldY, angle;
+    
     private int ROTATE_RIGHT_TO_LEFT = 0;
     private int ROTATE_LEFT_TO_RIGHT = 1;
+    private int ROTATE_TOP_TO_BOTTOM = 2;
+    private int ROTATE_BOTTOM_TO_TOP = 3;
 
     private boolean is_playing_desired; // Whether the user asked to go to PLAYING
 
@@ -47,9 +50,12 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Initialize GStreamer and warn if it fails
-        try {
+        try 
+        {
             GStreamer.init(this);
-        } catch (Exception e) {
+        }
+        catch (Exception e) 
+        {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -67,16 +73,8 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         int screenHeight = display.getHeight();  // deprecated
         Log.d ("TAG", "width = " + screenWidth + " height = " + screenHeight);
         
-        /* Calculate threadhold 
-         * screenWidth/2 = 90 degree
-         * Would like rotate 5 dregee a time
-         * 
-         * => threadHold = screenWidth*5/180
-         * 	  1280x720: threadHold = 35.55
-         */
-        
-        rotateThreadHold = (screenWidth)/180;  
-        
+        rotateThreadHoldX = (screenWidth)/180;  
+        rotateThreadHoldY = (screenHeight)*2/180;
         
         /* Control camera */
         sv.setOnTouchListener(new OnTouchListener() {
@@ -107,11 +105,9 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 					
 					/* If distance lager than threadhold -> rotate servo */
 					//if (distance > rotateThreadHold)
-					if (Math.abs(totalX) > rotateThreadHold)
+					if (Math.abs(totalX) > rotateThreadHoldX)
 					{
-						Log.d ("TAG", "servo rotate");
-						Log.d ("TAG", "totoalX = " + totalX + " totalY = " + totalY);
-						Log.d ("TAG", "distance = " + distance);
+						Log.d ("TAG", "totoalX = " + totalX);
 						
 						/* Rotate 5 degree a time */
 						if (totalX < 0)
@@ -120,11 +116,25 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 							native_request_servo_rotate (ROTATE_LEFT_TO_RIGHT);
 						
 						totalX = 0;
+					}
+					
+					if (Math.abs(totalY) > rotateThreadHoldY)
+					{
+						Log.d ("TAG", "totalY = " + totalY);
+						
+						/* Rotate 5 degree a time */
+						if (totalY < 0)
+							native_request_servo_rotate (ROTATE_BOTTOM_TO_TOP);
+						else
+							native_request_servo_rotate (ROTATE_TOP_TO_BOTTOM);
+						
 						totalY = 0;
 					}
 					
+					
 					prevX = x;
 					prevY = y;
+					
 					break;
 					
 				case MotionEvent.ACTION_UP:
