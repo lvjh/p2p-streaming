@@ -81,18 +81,31 @@ on_error (GstBus     *bus,
 	  gchar *message_string;
 
 	  gst_message_parse_error (message, &err, &debug_info);
-	  message_string = g_strdup_printf ("Error received from element %s: %s", GST_OBJECT_NAME (message->src), err->message);
-
 	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "=========================================\n");
+	  message_string = g_strdup_printf ("Error received from element %s: %s", GST_OBJECT_NAME (message->src), err->message);
 	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug_info = %s \n\n message_string = %s\n", debug_info, message_string);
+	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "=========================================\n");
 	  g_clear_error (&err);
 	  g_free (debug_info);
 	  g_free (message_string);
 }
 
-void  _video_receive_init_gstreamer(NiceAgent *magent, guint streamID, CustomData *data)
+static void on_pad_added (GstElement* object, GstPad* pad, gpointer data)
 {
-	GstElement *pipeline, *nicesrc, *capsfilter, *gstrtpjitterbuffer, *rtph264depay, *ff_decodeh264, *video_view;
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "on_pad_added");
+	GstPad *sinkpad;
+	GstElement *autovideosink = (GstElement *) data;
+	sinkpad = gst_element_get_static_pad (autovideosink, "sink");
+	gst_pad_link (pad, sinkpad);
+	gst_object_unref (sinkpad);
+}
+
+
+void  _video_receive_init_gstreamer (NiceAgent *magent, guint streamID, CustomData *data)
+{
+	GstElement *pipeline, *nicesrc, *capsfilter, *gstrtpjitterbuffer,
+		*rtph264depay, *h264parse, *decodebin2, *video_view;
+
 	GstBus *bus;
 	GstMessage *msg;
 	GstStateChangeReturn ret;
@@ -110,40 +123,50 @@ void  _video_receive_init_gstreamer(NiceAgent *magent, guint streamID, CustomDat
 		plugin_init, "0.1.4", "LGPL", "libnice",
 		"http://telepathy.freedesktop.org/wiki/", "");
 
+	/* Create elements */
 	nicesrc = gst_element_factory_make ("nicesrc", NULL);
 	capsfilter = gst_element_factory_make ("capsfilter", NULL);
 	gstrtpjitterbuffer = gst_element_factory_make ("gstrtpjitterbuffer", NULL);
 	rtph264depay = gst_element_factory_make ("rtph264depay", NULL);
-	ff_decodeh264 = gst_element_factory_make ("ffdec_h264", NULL);
+	h264parse = gst_element_factory_make ("h264parse", NULL);
+	decodebin2 = gst_element_factory_make ("decodebin2", NULL);
 	video_view = gst_element_factory_make ("autovideosink", NULL);
 
+	/* Set element's properties */
 	g_object_set (nicesrc, "agent", magent, NULL);
 	g_object_set (nicesrc, "stream", streamID, NULL);
 	g_object_set (nicesrc, "component", 1, NULL);
 	g_object_set (capsfilter, "caps", gst_caps_from_string("application/x-rtp, payload=(int)96"), NULL);
 
-	pipeline = gst_pipeline_new ("test-pipeline");
-	if (!pipeline || ! nicesrc || !capsfilter || !gstrtpjitterbuffer || !rtph264depay|| !ff_decodeh264|| !video_view)
+	pipeline = gst_pipeline_new("Receive Video Pipeline");
+
+	if (!pipeline || ! nicesrc || !capsfilter || !gstrtpjitterbuffer ||
+			!rtph264depay|| !video_view || !decodebin2 || !h264parse)
 	{
 		g_printerr ("Not all elements could be created.\n");
 		return;
 	}
 
-	gst_bin_add_many (GST_BIN (pipeline), nicesrc, capsfilter, gstrtpjitterbuffer, rtph264depay, ff_decodeh264, video_view, NULL);
-	if (gst_element_link_many (nicesrc, capsfilter, gstrtpjitterbuffer, rtph264depay, ff_decodeh264, video_view, NULL) != TRUE)
+	gst_bin_add_many (GST_BIN (pipeline), nicesrc, capsfilter,
+			 rtph264depay, h264parse, decodebin2, video_view, NULL);
+
+	if (gst_element_link_many (nicesrc, capsfilter, rtph264depay, h264parse, decodebin2, NULL) != TRUE)
 	{
-		g_printerr ("Elements could not be linked.\n");
+		g_printerr ("Elements could not be linked.[01]\n");
 		gst_object_unref (pipeline);
 		return;
 	}
+
+	g_signal_connect (decodebin2, "pad_added", G_CALLBACK (on_pad_added), video_view);
 
 	data->pipeline = pipeline;
 	gst_element_set_state(data->pipeline, GST_STATE_READY);
 	
 	data->video_sink = gst_bin_get_by_interface(GST_BIN(data->pipeline), GST_TYPE_X_OVERLAY);
-	if (!data->video_sink) {
-	GST_ERROR ("Could not retrieve video sink");
-	return NULL;
+	if (!data->video_sink)
+	{
+		GST_ERROR ("Could not retrieve video sink");
+		return;
 	}
 
 	//Instruct the bus to emit signals for each received message, and connect to the interesting signals

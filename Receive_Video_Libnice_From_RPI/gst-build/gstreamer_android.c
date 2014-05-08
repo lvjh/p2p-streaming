@@ -6,6 +6,8 @@
 static GstClockTime _priv_gst_info_start_time;
 
 /* Declaration of static plugins */
+  GST_PLUGIN_STATIC_DECLARE(uridecodebin);
+  GST_PLUGIN_STATIC_DECLARE(playback);
   GST_PLUGIN_STATIC_DECLARE(coreelements);
   GST_PLUGIN_STATIC_DECLARE(coreindexers);
   GST_PLUGIN_STATIC_DECLARE(adder);
@@ -165,6 +167,8 @@ static GstClockTime _priv_gst_info_start_time;
 void
 gst_android_register_static_plugins (void)
 {
+  GST_PLUGIN_STATIC_REGISTER(uridecodebin);
+  GST_PLUGIN_STATIC_REGISTER(playback);
   GST_PLUGIN_STATIC_REGISTER(coreelements);
   GST_PLUGIN_STATIC_REGISTER(coreindexers);
   GST_PLUGIN_STATIC_REGISTER(adder);

@@ -59,6 +59,7 @@ int stream ()
 	text_gathering_done = FALSE;
 
 	printf("[stream]video_send_gathering_done = %d\n", video_send_gathering_done);
+	printf ("		==========	STREAMING	========== \n");
 	/* Init video streaming */
 	video_send = g_thread_new("send video", &_video_send_main, NULL);
 	send_audio = g_thread_new("send audio", &_send_audio_main, NULL);

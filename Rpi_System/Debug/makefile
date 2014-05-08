@@ -9,6 +9,7 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include Utils/subdir.mk
+-include Uart/subdir.mk
 -include Rpi_Setup/subdir.mk
 -include P2P_Stream/subdir.mk
 -include Connect_Server/subdir.mk

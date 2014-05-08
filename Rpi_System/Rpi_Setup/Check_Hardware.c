@@ -250,10 +250,13 @@ void uart_init ()
 
 void Rpi_setup ()
 {
+	printf ("==========	CHECKING HARDWARE	========== \n");
 	/* Network */
 	setup_network();
 	setup_camera();
 	setup_audio();
 	uart_init();
+
+	printf ("\n\n");
 }
 

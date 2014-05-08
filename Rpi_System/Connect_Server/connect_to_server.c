@@ -85,9 +85,11 @@ int connect_to_server()
 	int ret;
 
 	// Connect to server
+
+	printf ("==========	CONNECT TO SERVER	========== \n");
 	while(1)
 	{
-		ret = connect_with_timeout(SERVER, SERVER_PORT, 5, 0, "khtn$abcd");
+		ret = connect_with_timeout (SERVER, SERVER_PORT, 5, 0, "khtn$abcd");
 
 		if (ret == -2 || ret == -3 || ret == -4)//timeout
 		{
@@ -104,6 +106,7 @@ int connect_to_server()
 			global_socket = ret;
 			printf ("Connect to server: ret = %d\n", global_socket);
 			printf("Connect successful!\n");
+			printf ("\n\n");
 			break;
 		}
 	}
@@ -121,6 +124,9 @@ int wait_android_request()
 	memset(originBuf,'\0', sizeof(originBuf));
 	memset(destBuf,'\0', sizeof(destBuf));
 
+	printf ("==========	WAITTNG ANDROID REQUEST	========== \n");
+	printf ("Waiting android request ...\n");
+
 	/* wait until receive android's request */
 	if(recv(global_socket, buffer, 181, NULL))
 	{
@@ -130,15 +136,17 @@ int wait_android_request()
 		header = strtok (receiver,"$");
 		origin = strtok (NULL,"$");
 		dest = strtok (NULL,"$");
-		strncpy(originBuf,origin,strlen(origin));
-		strncpy(destBuf,dest, strlen(dest));
+		strncpy(originBuf, origin, strlen(origin));
+		strncpy(destBuf, dest, strlen(dest));
+
+		printf ("\n\n");
 
 		if (!strcmp(header,"001"))
 		{
-
 			return 1;
 		}
 		else
 			return 0;
 	}
+
 }

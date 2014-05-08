@@ -15,9 +15,13 @@ int main()
 	while (1)
 	{
 		/* Wait android request */
-		printf ("Waiting android request ...\n");
 		do{
 			ret = wait_android_request();
+
+			/* Server down -> connect again */
+//			if (!ret)
+//				connect_to_server();
+
 		}while(!ret);
 
 		printf("Accept android's request!\n");

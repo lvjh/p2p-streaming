@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../P2P_Stream/controller.c \
 ../P2P_Stream/gstreamer_log.c \
 ../P2P_Stream/receive_audio.c \
 ../P2P_Stream/send_audio.c \
@@ -13,6 +14,7 @@ C_SRCS += \
 ../P2P_Stream/text.c 
 
 OBJS += \
+./P2P_Stream/controller.o \
 ./P2P_Stream/gstreamer_log.o \
 ./P2P_Stream/receive_audio.o \
 ./P2P_Stream/send_audio.o \
@@ -22,6 +24,7 @@ OBJS += \
 ./P2P_Stream/text.o 
 
 C_DEPS += \
+./P2P_Stream/controller.d \
 ./P2P_Stream/gstreamer_log.d \
 ./P2P_Stream/receive_audio.d \
 ./P2P_Stream/send_audio.d \
