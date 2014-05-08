@@ -89,7 +89,7 @@ int connect_to_server()
 	printf ("==========	CONNECT TO SERVER	========== \n");
 	while(1)
 	{
-		ret = connect_with_timeout (SERVER, SERVER_PORT, 5, 0, "khtn$abcd");
+		ret = connect_with_timeout (SERVER, SERVER_PORT, 5, 0, "rpi001$6789");
 
 		if (ret == -2 || ret == -3 || ret == -4)//timeout
 		{

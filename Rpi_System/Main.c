@@ -19,8 +19,8 @@ int main()
 			ret = wait_android_request();
 
 			/* Server down -> connect again */
-//			if (!ret)
-//				connect_to_server();
+			if (!ret)
+				connect_to_server();
 
 		}while(!ret);
 

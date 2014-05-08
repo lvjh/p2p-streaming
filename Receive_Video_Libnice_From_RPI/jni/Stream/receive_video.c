@@ -92,14 +92,14 @@ on_error (GstBus     *bus,
 
 static void on_pad_added (GstElement* object, GstPad* pad, gpointer data)
 {
-	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "on_pad_added");
+	gchar *pad_name = gst_pad_get_name(pad);
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "on_pad_added = %s", pad_name);
 	GstPad *sinkpad;
 	GstElement *autovideosink = (GstElement *) data;
 	sinkpad = gst_element_get_static_pad (autovideosink, "sink");
 	gst_pad_link (pad, sinkpad);
 	gst_object_unref (sinkpad);
 }
-
 
 void  _video_receive_init_gstreamer (NiceAgent *magent, guint streamID, CustomData *data)
 {
@@ -398,7 +398,7 @@ static int connect_to_rpi()
 	char sender[181] = {0};
 	int rc;
 
-	rc = Base64Encode("001$ceslab$khtn", sender, BUFFFERLEN);
+	rc = Base64Encode("001$ceslab$rpi001", sender, BUFFFERLEN);
 
 	send(global_socket, sender, 181, NULL);
 	return 0;
