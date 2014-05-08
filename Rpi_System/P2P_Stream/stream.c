@@ -15,8 +15,11 @@ void* _check_connection()
 	}
 
 	printf ("[check_connection] text done!\n");
+	printf ("global_socket = %d\n", global_socket);
 
-	if(recv(global_socket, buffer, 181, NULL))
+	int ret = recv(global_socket, buffer, 181, NULL);
+
+	if( ret != -1)// Good
 	{
 		rc = Base64Decode(buffer, receiver, BUFFFERLEN);
 		printf("Android's username exit[Full message] = %s\n", receiver);
@@ -33,6 +36,10 @@ void* _check_connection()
 			g_main_loop_quit (gloop);
 			return;
 		}
+	}
+	else if (ret == -1) // Error
+	{
+		printf ("Receive signal Who Android phone disconnect failed!\n");
 	}
 }
 
