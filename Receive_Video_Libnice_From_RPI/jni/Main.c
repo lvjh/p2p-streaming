@@ -46,7 +46,8 @@ static JNINativeMethod native_methods[] =
   { "nativeSurfaceInit", "(Ljava/lang/Object;)V", (void *) gst_native_surface_init},
   { "nativeSurfaceFinalize", "()V", (void *) gst_native_surface_finalize},
   { "nativeClassInit", "()Z", (void *) gst_native_class_init},
-  { "native_request_servo_rotate", "(I)V", (void *) rotate_servo}
+  { "native_request_servo_rotate", "(I)V", (void *) rotate_servo},
+  { "native_get_temperature", "()V", (void *) getTemperature}
 };
 
 ///* List of implemented native methods */

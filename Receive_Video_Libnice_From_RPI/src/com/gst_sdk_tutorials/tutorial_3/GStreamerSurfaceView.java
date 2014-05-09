@@ -15,23 +15,19 @@ import android.view.WindowManager;
 public class GStreamerSurfaceView extends SurfaceView {
     public int media_width = 1920;
     public int media_height = 1080;
-    private Context mContext;
 
     // Mandatory constructors, they do not do much
     public GStreamerSurfaceView(Context context, AttributeSet attrs,
             int defStyle) {
         super(context, attrs, defStyle);
-        mContext = context;
     }
     
     public GStreamerSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
     }
 
     public GStreamerSurfaceView (Context context) {
         super(context);
-        mContext = context;
     }
     
 	// Called by the layout manager to find out our size and give us some rules.
@@ -40,12 +36,11 @@ public class GStreamerSurfaceView extends SurfaceView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = 0, height = 0;
-        int wmode = View.MeasureSpec.getMode(widthMeasureSpec);
-        int hmode = View.MeasureSpec.getMode(heightMeasureSpec);
-        int wsize = View.MeasureSpec.getSize(widthMeasureSpec);
-        int hsize = View.MeasureSpec.getSize(heightMeasureSpec);
+        int wmode = View.MeasureSpec.getMode (widthMeasureSpec);
+        int hmode = View.MeasureSpec.getMode (heightMeasureSpec);
+        int wsize = View.MeasureSpec.getSize (widthMeasureSpec);
+        int hsize = View.MeasureSpec.getSize (heightMeasureSpec);
 
-        //Log.i ("GStreamer", "onMeasure called with " + media_width + "x" + media_height);
         // Obey width rules
         switch (wmode) {
         case View.MeasureSpec.AT_MOST:
@@ -59,7 +54,7 @@ public class GStreamerSurfaceView extends SurfaceView {
         case View.MeasureSpec.UNSPECIFIED:
             width = media_width;
         }
-        //Log.i ("GStreamer", "onMeasure called with " + width + "x" + height);
+
         // Obey height rules
         switch (hmode) {
         case View.MeasureSpec.AT_MOST:
@@ -73,7 +68,7 @@ public class GStreamerSurfaceView extends SurfaceView {
         case View.MeasureSpec.UNSPECIFIED:
             height = media_height;
         }
-        //Log.i ("GStreamer", "onMeasure called with " + width + "x" + height);
+
         // Finally, calculate best size when both axis are free
         if (hmode == View.MeasureSpec.AT_MOST && wmode == View.MeasureSpec.AT_MOST) {
             int correct_height = width * media_height / media_width;
@@ -86,14 +81,8 @@ public class GStreamerSurfaceView extends SurfaceView {
         }
 
         // Obey minimum size
-//        width = Math.max (getSuggestedMinimumWidth(), width);
-//        height = Math.max (getSuggestedMinimumHeight(), height);
         Log.i ("GStreamer", "onMeasure called with " + width + "x" + height);
-        
-       /* WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        width = display.getWidth();
-        height = display.getHeight();*/
+
         setMeasuredDimension(width, height);
     }
 

@@ -21,6 +21,9 @@ struct sockaddr_in addr;
 int sConnect;
 static int _text_receive_ClientThread();
 
+#define SERVO_COMMAND 0x01
+#define GETTEMP_COMMAND 0x05
+
 void*  _text_receive_main()
 {
 	//NiceAgent *agent;
@@ -363,16 +366,29 @@ static gboolean _text_receive_stdin_send_data_cb (GIOChannel *source, GIOConditi
 static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint component_id,
     guint len, gchar *buf, gpointer data)
 {
-	printf ("Receive command!\n");
 
 	if (len == 1 && buf[0] == '\0')
 		g_main_loop_quit (gloop);
 
 	printf("%c %c %d\n", buf[0], buf[1], buf[2], buf[3]);
 
-	/* Control servo */
-	if (buf[0] == '1')
-		uart_control_servo (buf[1], buf[2], buf[3]); // servo number[1,2], direction[+,-], degree
+	switch(buf[0])
+	{
+		case SERVO_COMMAND:
+		{
+			printf ("Receive control servo command\n");
+			uart_control_servo (buf[1], buf[2], buf[3]); // servo number[1,2], direction[+,-], degree
+			break;
+		}
+		case GETTEMP_COMMAND:
+		{
+			printf ("Receive get temperature command\n");
+			uart_get_temnperature();
+		}
+		default:
+			break;
+
+	}
 
 	fflush(stdout);
 }

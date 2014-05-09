@@ -90,6 +90,7 @@ void check_initialization_complete (CustomData *data) {
 	video_receive_gathering_done = FALSE;
 	send_audio_gathering_done = FALSE;
 	receive_audio_gathering_done = FALSE;
+	controller_gathering_done = FALSE;
 
 	video_receive = g_thread_new("video_receive_main", &_video_receive_main, app_data->video_receive_data);
 	receive_audio = g_thread_new("receive audio", &_receive_audio_main, app_data->receive_audio_data);
@@ -239,16 +240,20 @@ void check_initialization_complete (CustomData *data) {
 	return JNI_TRUE;
 }
 
- void gst_native_surface_init (JNIEnv *env, jobject thiz, jobject surface) {
+void gst_native_surface_init (JNIEnv *env, jobject thiz, jobject surface)
+{
 	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "native_surface_init start");
 	CustomData *data = GET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id);
+
 	if (!data)
 		return;
+
 	ANativeWindow *new_native_window = ANativeWindow_fromSurface(env, surface);
 	GST_DEBUG ("Received surface %p (native window %p)", surface, new_native_window);
 	if (data->native_window)
 	{
 		ANativeWindow_release (data->native_window);
+
 		if (data->native_window == new_native_window)
 		{
 			GST_DEBUG ("New native window is the same as the previous one", data->native_window);

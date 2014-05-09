@@ -20,10 +20,12 @@ static int sConnect;
 CustomData *mData;
 static int _text_receive_ClientThread();
 
-#define SERVO_COMMAND '1'
+#define SERVO_COMMAND 0x01
 #define SERVO_01 1
 #define SERVO_02 2
 #define DEGREE_PER_ROTATE 5
+
+#define GETTEMP_COMMAND 0x05
 
 void*  _text_receive_main(CustomData *data)
 {
@@ -108,6 +110,7 @@ static void  _text_receive_cb_candidate_gathering_done(NiceAgent *agent, guint s
 		fflush (stdout);
 	}
 
+	controller_gathering_done = TRUE;
 	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "[TEXT] Gathering done!");
 }
 
@@ -174,36 +177,6 @@ static int  _text_receive_print_local_data(NiceAgent *agent, guint stream_id, gu
 
 	return result;
 }
-
-//static gboolean _text_receive_stdin_remote_info_cb (GIOChannel *source, GIOCondition cond,
-//    gpointer data)
-//{
-//	NiceAgent *agent = data;
-//	gchar *line = NULL;
-//	int rval;
-//	gboolean ret = TRUE;
-//
-//	if (g_io_channel_read_line (source, &line, NULL, NULL, NULL) ==
-//	G_IO_STATUS_NORMAL) {
-//
-//		// Parse remote candidate list and set it on the agent
-//		rval = _text_receive_parse_remote_data(agent, stream_id, 1, line);
-//		if (rval == EXIT_SUCCESS) {
-//			// Return FALSE so we stop listening to stdin since we parsed the
-//			// candidates correctly
-//			ret = FALSE;
-//			g_debug("waiting for state READY or FAILED signal...");
-//		} else {
-//			fprintf(stderr, "ERROR: failed to parse remote data\n");
-//			printf("Enter remote data (single line, no wrapping):\n");
-//			printf("> ");
-//			fflush (stdout);
-//		}
-//		g_free (line);
-//	}
-//
-//	return ret;
-//}
 
 static int  _text_receive_parse_remote_data(NiceAgent *agent, guint stream_id,
     guint component_id, char *line)
@@ -340,42 +313,11 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 	}
 }
 
-/*static gboolean _text_receive_stdin_send_data_cb (GIOChannel *source, GIOCondition cond,
-    gpointer data)
-{
-	NiceAgent *agent = data;
-	gchar *line = NULL;
-
-	if (g_io_channel_read_line (source, &line, NULL, NULL, NULL) ==
-	G_IO_STATUS_NORMAL) {
-	nice_agent_send(agent, stream_id, 1, strlen(line), line);
-	g_free (line);
-	printf("> ");
-	fflush (stdout);
-	} else {
-	nice_agent_send(agent, stream_id, 1, 1, "\0");
-	// Ctrl-D was pressed.
-	g_main_loop_quit (gloop);
-	}
-
-	return TRUE;
-}*/
-
-//void gst_native_send_text (JNIEnv* env, jobject thiz, jstring text)
-//{
-//	const char *str= (*env)->GetStringUTFChars(env,text,0);
-//	nice_agent_send(agent, stream_id, 1, strlen(str), str);
-//}
-
-/*
- *  command ID: 0x1
- *  angle;
- * */
-
+/* Control servo */
 void rotate_servo (JNIEnv* env, jobject thiz, jint direction)
 {
 	// id [1], servo id[1,2], direction[+,-], dgree, end-of-string
-	 __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Send servo ... !");
+	 __android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send servo ... !");
 	gchar *command;
 	command = (gchar*)malloc(sizeof(gchar)*5);
 
@@ -398,16 +340,33 @@ void rotate_servo (JNIEnv* env, jobject thiz, jint direction)
 	command[3] = DEGREE_PER_ROTATE;
 	command[4] = '\0';
 
-	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Send servo ... 01 !");
-	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "agent = %d, stream_id = %d, command = %s",
-			mData->agent, mData->stream_id, command);
-
 	/* Send command to RPI */
 	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
 
-	 __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Send servo done!");
+	 __android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send servo done!");
 }
 
+/* Get Temperature */
+void getTemperature (JNIEnv* env, jobject thiz)
+{
+	if(controller_gathering_done == FALSE)
+		return;
+
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get Temp ... !");
+	gchar *command;
+	command = (gchar*)malloc(sizeof(gchar)*5);
+
+	/* Command id */
+	command[0] = GETTEMP_COMMAND;
+	command[1] = 0xff;
+	command[2] = 0xff;
+	command[3] = 0xff;
+	command[4] = '\0';
+
+	/* Send command to RPI */
+	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get temp done!");
+}
 
 static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint component_id,
     guint len, gchar *buf, gpointer data)
@@ -416,6 +375,7 @@ static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint 
 	if (len == 1 && buf[0] == '\0')
 		g_main_loop_quit (mData->main_loop);
 	 __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Receive tex = %.*s",len,buf);
+
 //	jstring jmessage = (*env)->NewStringUTF(env, buf);
 //	(*env)->CallVoidMethod (env, mData->app, set_message_from_rpi, jmessage);
 //	if ((*env)->ExceptionCheck (env))

@@ -2,7 +2,6 @@ package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -27,6 +26,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private native void nativeSurfaceInit(Object surface);
     private native void nativeSurfaceFinalize();
     private native void native_request_servo_rotate(int direction);
+    private native void native_get_temperature();
     private long native_custom_data; // Native code will use this to keep private data
     private long video_receive_native_custom_data;
     private long audio_send_native_custom_data;
@@ -39,6 +39,8 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private int ROTATE_BOTTOM_TO_TOP = 3;
 
     private boolean is_playing_desired; // Whether the user asked to go to PLAYING
+    Thread getTemperature;
+    private boolean isRunning = true;
 
     // Called when the activity is first created.
     @Override
@@ -66,6 +68,9 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         SurfaceView sv = (SurfaceView) this.findViewById(R.id.surface_video);
         SurfaceHolder sh = sv.getHolder();
         sh.addCallback(this);
+        
+        getTemperature = new Thread(getTempRunnable);
+        getTemperature.start();
         
         /* Get phone screen size */
         Display display = getWindowManager().getDefaultDisplay(); 
@@ -162,6 +167,29 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         nativeInit();
     }
 
+    /* Thread to send control to get temperature from Rpi */
+    Runnable getTempRunnable = new Runnable() {
+		@Override
+		public void run() {
+			while (isRunning)
+			{
+				native_get_temperature();
+				
+				try 
+				{
+					Thread.sleep(1000);
+				} 
+				catch (InterruptedException e) 
+				{
+					e.printStackTrace();
+				}
+			}
+			
+			Log.d("TAG", "Stop get temperature!");
+		}
+	};
+	
+	
     protected void onSaveInstanceState (Bundle outState) {
         Log.d ("GStreamer", "Saving state, playing:" + is_playing_desired);
         outState.putBoolean("playing", is_playing_desired);
@@ -172,7 +200,14 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         super.onDestroy();
     }
 
-    // Called from native code. This sets the content of the TextView from the UI thread.
+    
+    @Override
+	protected void onStop() {
+		super.onStop();
+		isRunning = false;
+	}
+    
+	// Called from native code. This sets the content of the TextView from the UI thread.
     private void setMessage(final String message) {
     }
 

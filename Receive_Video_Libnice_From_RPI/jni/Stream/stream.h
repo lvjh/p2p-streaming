@@ -60,6 +60,7 @@ jfieldID name_field_id;
 gboolean video_receive_gathering_done;
 gboolean send_audio_gathering_done;
 gboolean receive_audio_gathering_done;
+gboolean controller_gathering_done;
 
 #define STUNSR_ADDR  "107.23.150.92"
 #define STUNSR_PORT 3478
@@ -149,6 +150,7 @@ int  _send_audio_parse_remote_data(NiceAgent *agent, guint streamID,
     guint component_id, char *line);
 static NiceCandidate* _send_audio_parse_candidate(char *scand, guint streamID);
 void rotate_servo (JNIEnv* env, jobject thiz, jint direction);
+void getTemperature (JNIEnv* env, jobject thiz);
 
 #endif
 

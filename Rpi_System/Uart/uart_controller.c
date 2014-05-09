@@ -17,6 +17,12 @@ int uart_control_servo (int servo_id, char direction, int degree)
 	printf ("send servo done!\n");
 }
 
+void uart_get_temnperature ()
+{
+	get_temperature(rpi_hardware.uart.uart_fd);
+	printf ("send to get temp done!\n");
+}
+
 //int uart_controller (char controller_id, char direction, char degree)
 //{
 //	pthread_t rx_thread;
