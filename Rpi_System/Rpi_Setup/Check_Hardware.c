@@ -245,6 +245,7 @@ void uart_init ()
 	}
 
 	rpi_hardware.uart.uart_fd = uart0_filestream;
+	startUartReceiveThread();
 	printf("UART is available!\n");
 }
 

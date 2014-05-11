@@ -37,8 +37,7 @@ int open_uart (const char *device, const int baud)
 
   fcntl (fd, F_SETFL, O_RDWR) ;
 
-// Get and modify current options:
-
+  // Get and modify current options
   tcgetattr (fd, &options) ;
 
     cfmakeraw   (&options) ;
@@ -93,7 +92,7 @@ int tx_uart (int fd, const char *tx_buffer, int len)
 	return 	tx_bytes;
 }
 
-int rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected)
+char* rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected)
 {
 	int offset = 0;
 
@@ -111,12 +110,39 @@ int rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected)
 		else
 		{
 			rx_buffer[rx_length] = '\0';
-			int i;			
-			for (i = 0; i<rx_length; i++)
-				printf("%d ", rx_buffer[i]);
+//			int i;
+//			for (i = 0; i<rx_length; i++)
+//				printf("%d ", rx_buffer[i]);
 		}
 	}while (offset < num_byte_receive_expected);
 
-	return offset;
+	return rx_buffer;
 }
 
+static void receive_uart_thread(int *pfd)
+{
+	char *rx_buffer;
+	rx_buffer = (char*)malloc(sizeof(char)*256);
+	int i;
+
+	while ( !StopUartReceive )
+	{
+		rx_uart (*pfd, rx_buffer, 6);
+		printf("\n\n ======= Receive ==========\n");
+		for (i = 0; i < 6; i++)
+			printf ("%d \n", rx_buffer[i]);
+
+		printf(" ===================\n\n");
+		fflush (stdout) ;
+	}
+}
+
+
+int startUartReceiveThread()
+{
+	StopUartReceive = 0;
+	int *pfd;
+	pfd = (int*)malloc(sizeof(int));
+	*pfd = rpi_hardware.uart.uart_fd;
+	pthread_create( &rx_thread, NULL, &receive_uart_thread, pfd);
+}

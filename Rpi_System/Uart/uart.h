@@ -7,7 +7,12 @@
 #include <string.h>
 #include <sys/ioctl.h>
  #include <pthread.h>
+#include "../Rpi_Setup/Check_Hardware.h"
+
+pthread_t rx_thread;
+int StopUartReceive;
 
 int open_uart (const char *device, const int baud);
 int tx_uart (int fd, const char *tx_buffer, int len);
-int rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected);
+char* rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected);
+int startUartReceiveThread();
