@@ -20,7 +20,8 @@ static int sConnect;
 CustomData *mData;
 static int _text_receive_ClientThread();
 
-#define SERVO_COMMAND 0x01
+#define PIEZO_COMMAND 0x01
+#define SERVO_COMMAND 0x03
 #define SERVO_01 1
 #define SERVO_02 2
 #define DEGREE_PER_ROTATE 5
@@ -349,7 +350,7 @@ void rotate_servo (JNIEnv* env, jobject thiz, jint direction)
 /* Get Temperature */
 void getTemperature (JNIEnv* env, jobject thiz)
 {
-	if(controller_gathering_done == FALSE)
+	if (controller_gathering_done == FALSE)
 		return;
 
 	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get Temp ... !");
@@ -368,23 +369,58 @@ void getTemperature (JNIEnv* env, jobject thiz)
 	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get temp done!");
 }
 
+/* Control Piezosiren */
+void controlPiezosiren(JNIEnv* env, jobject thiz, jint status)
+{
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren !");
+	if (controller_gathering_done == FALSE)
+		return;
+
+	gchar *command;
+	command = (gchar*)malloc(sizeof(gchar)*5);
+
+	/* Command id */
+	command[0] = PIEZO_COMMAND;
+	command[1] = status;
+	command[2] = 0xff;
+	command[3] = 0xff;
+	command[4] = '\0';
+
+	/* Send command to RPI */
+	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren done... !");
+}
+
 static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint component_id,
     guint len, gchar *buf, gpointer data)
 {
 	JNIEnv *env = get_jni_env ();
+	char message[5]={0};
+	jstring jmessage;
+
 	if (len == 1 && buf[0] == '\0')
 		g_main_loop_quit (mData->main_loop);
-	 __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Receive tex = %.*s",len,buf);
 
-//	jstring jmessage = (*env)->NewStringUTF(env, buf);
-//	(*env)->CallVoidMethod (env, mData->app, set_message_from_rpi, jmessage);
-//	if ((*env)->ExceptionCheck (env))
-//	{
-//	    (*env)->ExceptionDescribe(env);
-//	    (*env)->ExceptionClear (env);
-//    }
-//
-//	(*env)->DeleteLocalRef (env, jmessage);
+	int i;
+	for (i = 0; i < 4; i++)
+		__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "%d_", buf[i]);
+
+	switch(buf[0])
+	{
+		case GETTEMP_COMMAND:
+			sprintf(message, "%d", buf[1]);
+			jmessage = (*env)->NewStringUTF(env, message);
+			(*env)->CallVoidMethod (env, mData->app, set_message_method_id, jmessage);
+			if ((*env)->ExceptionCheck (env))
+			{
+				(*env)->ExceptionDescribe(env);
+				    (*env)->ExceptionClear (env);
+			}
+			(*env)->DeleteLocalRef (env, jmessage);
+			break;
+		default:
+			break;
+	}
 }
 
 static void _text_receive_cb_new_selected_pair(NiceAgent *agent, guint stream_id,
@@ -398,60 +434,61 @@ static int _text_receive_ClientThread()
 {
 
 	char *header, *init, *dest, *data;
-		char buffer[181] = { 0 };
-		char temp[181] = { 0 };
-		char combine[181] = { 0 };
-		int flag = 0;
+	char buffer[181] = { 0 };
+	char temp[181] = { 0 };
+	char combine[181] = { 0 };
+	int flag = 0;
 
-		char receiver[181] = {0};
-		char sender[181] = {0};
-		int rc = 0;
+	char receiver[181] = {0};
+	char sender[181] = {0};
+	int rc = 0;
 
-		memcpy(temp, mInfo_Text, sizeof(temp));
+	memcpy(temp, mInfo_Text, sizeof(temp));
 
-		// Request to connect Rpi
-		//send(global_socket, "001$ceslab$khtn", 181, NULL);
+	// Request to connect Rpi
+	//send(global_socket, "001$ceslab$khtn", 181, NULL);
 
-		while (1) {
-			// The server will send a struct to the client
-			// containing message and ID
-			// But send only accepts a char as buffer parameter
-			// so here we need to recv a char buffer and then
-			// we copy the content of this buffer to our struct
-			if (recv(global_socket, buffer, 181, NULL)) {
-				__android_log_print(ANDROID_LOG_INFO, "tutorial-3",
-						"[text] receive = %s", buffer);
-				rc = Base64Decode(buffer, receiver, BUFFFERLEN);
-				header = strtok(receiver, "$");
-				init = strtok(NULL, "$");
-				dest = strtok(NULL, "$");
-				data = strtok(NULL, "$");
-				//__android_log_print(ANDROID_LOG_INFO, "tutorial-3",
-				//					"[VIDEO] data = %s", data);
-				/*if(buffer[0]!='2')
-				 {
-				 memcpy(mInfo_Text,buffer,sizeof(buffer));
-				 flag_trans = 1;
-				 break;
-				 }
-				 else send(sConnect,temp,181,NULL);*/
-
-				/* Receive rpi's info -> send its'info */
-				if (!strcmp(header, "002") && flag < 1) {
-					//cout<<"002";
-					memcpy(rpiInfo_Text,data,strlen(data));
-					sprintf(combine, "002$%s$%s$%s", dest, init, temp);
-					rc = Base64Encode(combine, sender, BUFFFERLEN);
-					send(global_socket, sender, 181, NULL);
-					//cout<<data<<endl<<"Trade completed!"<<endl;
-					flag_trans = 1;
-					flag++;
-					return 0;
-				}
+	while (1) {
+		// The server will send a struct to the client
+		// containing message and ID
+		// But send only accepts a char as buffer parameter
+		// so here we need to recv a char buffer and then
+		// we copy the content of this buffer to our struct
+		if (recv(global_socket, buffer, 181, NULL))
+		{
+			__android_log_print(ANDROID_LOG_INFO, "tutorial-3",
+			"[text] receive = %s", buffer);
+			rc = Base64Decode(buffer, receiver, BUFFFERLEN);
+			header = strtok(receiver, "$");
+			init = strtok(NULL, "$");
+			dest = strtok(NULL, "$");
+			data = strtok(NULL, "$");
+			//__android_log_print(ANDROID_LOG_INFO, "tutorial-3",
+			//					"[VIDEO] data = %s", data);
+			/*if(buffer[0]!='2')
+			{
+			memcpy(mInfo_Text,buffer,sizeof(buffer));
+			flag_trans = 1;
+			break;
 			}
+			else send(sConnect,temp,181,NULL);*/
 
-			usleep(10000);
+			/* Receive rpi's info -> send its'info */
+			if (!strcmp(header, "002") && flag < 1) {
+			//cout<<"002";
+			memcpy(rpiInfo_Text,data,strlen(data));
+			sprintf(combine, "002$%s$%s$%s", dest, init, temp);
+			rc = Base64Encode(combine, sender, BUFFFERLEN);
+			send(global_socket, sender, 181, NULL);
+			//cout<<data<<endl<<"Trade completed!"<<endl;
+			flag_trans = 1;
+			flag++;
+			return 0;
 		}
+	}
 
-		return 0;
+	usleep(10000);
+	}
+
+	return 0;
 }

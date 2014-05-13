@@ -12,7 +12,7 @@ static GCond *cond;
 static gchar *mInfo_Text;
 static gchar *AndroidInfo_Text;
 static gboolean stopThread;
-static int flag_trans=0;
+static int flag_trans = 0;
 static gboolean hasdata = FALSE;
 
 static gchar data_buf[512] = {0};
@@ -21,7 +21,8 @@ struct sockaddr_in addr;
 int sConnect;
 static int _text_receive_ClientThread();
 
-#define SERVO_COMMAND 0x01
+#define PIEZOSIREN_COMMAND 0x01
+#define SERVO_COMMAND 0x03
 #define GETTEMP_COMMAND 0x05
 
 void*  _text_receive_main()
@@ -260,7 +261,7 @@ static int  _text_receive_parse_remote_data(NiceAgent *agent, guint stream_id,
 	return result;
 }
 
-static NiceCandidate* _text_receive_parse_candidate(char *scand, guint streamID)
+static NiceCandidate* _text_receive_parse_candidate (char *scand, guint streamID)
 {
 	NiceCandidate *cand = NULL;
 	NiceCandidateType ntype;
@@ -303,24 +304,24 @@ static NiceCandidate* _text_receive_parse_candidate(char *scand, guint streamID)
 	return cand;
 }
 
-static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint stream_id,
+static void _text_receive_cb_component_state_changed (NiceAgent *agent, guint stream_id,
     guint component_id, guint state, gpointer data)
 {
 	printf ("SIGNAL: state changed %d %d %s[%d]\n",
 	stream_id, component_id, state_name[state], state);
 
-	if (state == NICE_COMPONENT_STATE_READY) {
+	if (state == NICE_COMPONENT_STATE_READY)
+	{
 		NiceCandidate *local, *remote;
 
 		// Get current selected candidate pair and print IP address used
 		if (nice_agent_get_selected_pair (agent, stream_id, component_id,
 		&local, &remote)) {
 			gchar ipaddr[INET6_ADDRSTRLEN];
-
-			nice_address_to_string(&local->addr, ipaddr);
+			nice_address_to_string (&local->addr, ipaddr);
 			//printf("\nNegotiation complete: ([%s]:%d,",
 			//ipaddr, nice_address_get_port(&local->addr));
-			nice_address_to_string(&remote->addr, ipaddr);
+			nice_address_to_string (&remote->addr, ipaddr);
 			//printf(" [%s]:%d)\n", ipaddr, nice_address_get_port(&remote->addr));
 		}
 
@@ -330,8 +331,10 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 //		printf("> ");
 //		fflush (stdout);
 
-		sendToAndroid = g_thread_create(send_data_to_android, agent, FALSE, NULL);
-	} else if (state == NICE_COMPONENT_STATE_FAILED) {
+		//sendToAndroid = g_thread_create(send_data_to_android, agent, FALSE, NULL);
+	}
+	else if (state == NICE_COMPONENT_STATE_FAILED)
+	{
 		g_main_loop_quit (gloop);
 	}
 }
@@ -370,7 +373,7 @@ static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint 
 	if (len == 1 && buf[0] == '\0')
 		g_main_loop_quit (gloop);
 
-	printf("%c %c %d\n", buf[0], buf[1], buf[2], buf[3]);
+	printf("%d %d %d %d\n", buf[0], buf[1], buf[2], buf[3]);
 
 	switch(buf[0])
 	{
@@ -384,6 +387,13 @@ static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint 
 		{
 			printf ("Receive get temperature command\n");
 			uart_get_temnperature();
+			break;
+		}
+		case PIEZOSIREN_COMMAND:
+		{
+			printf ("Receive piezosiren command\n");
+			uart_control_piezosiren(buf[1]);
+			break;
 		}
 		default:
 			break;
@@ -455,13 +465,13 @@ static int _text_receive_ClientThread()
 static int send_data_to_android(NiceAgent *agent)
 {
 	time_t rawtime;
-	struct tm * timeinfo;
+	struct tm *timeinfo;
 
 	while(1)
 	{
 		time ( &rawtime );
 	    timeinfo = localtime ( &rawtime );
-		nice_agent_send(agent, RpiData_Text->streamID, 1, strlen(asctime (timeinfo)), asctime (timeinfo));
+		nice_agent_send ( agent, RpiData_Text->streamID, 1, strlen(asctime (timeinfo)), asctime (timeinfo) );
 		usleep(5000000);
 	}
 }

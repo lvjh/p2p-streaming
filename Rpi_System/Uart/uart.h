@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
  #include <pthread.h>
 #include "../Rpi_Setup/Check_Hardware.h"
+#include "../P2P_Stream/stream.h"
 
 pthread_t rx_thread;
 int StopUartReceive;

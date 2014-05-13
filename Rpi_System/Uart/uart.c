@@ -95,10 +95,14 @@ int tx_uart (int fd, const char *tx_buffer, int len)
 char* rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected)
 {
 	int offset = 0;
+	char *receiveBuf = (char *) malloc(6);
+	memset(receiveBuf,0, 6);
+	int mOffset = 0;
 
 	do {
 		int rx_length = read(fd, (void*)rx_buffer, sizeof(rx_buffer));
 		offset += rx_length;
+
 		if (rx_length < 0)
 		{
 			printf ("Receive Error,  error = %s\n", strerror(errno));
@@ -110,30 +114,53 @@ char* rx_uart (int fd, char *rx_buffer, int num_byte_receive_expected)
 		else
 		{
 			rx_buffer[rx_length] = '\0';
-//			int i;
-//			for (i = 0; i<rx_length; i++)
-//				printf("%d ", rx_buffer[i]);
+			//printf("%i bytes read : %s\n", rx_length, rx_buffer);
+			int i;
+			for (i = 0; i < rx_length; i++)
+			{
+				//printf ("%d ", rx_buffer[i]);
+				receiveBuf[mOffset++] = rx_buffer[i];
+			}
+			//printf("\n");
 		}
 	}while (offset < num_byte_receive_expected);
 
-	return rx_buffer;
+	printf ("\n");
+	return receiveBuf;
 }
 
 static void receive_uart_thread(int *pfd)
 {
 	char *rx_buffer;
-	rx_buffer = (char*)malloc(sizeof(char)*256);
+	rx_buffer = (char*) malloc(sizeof(char)*256);
 	int i;
+	char *command;
+	command = (char*) malloc(sizeof(char)*5);
 
 	while ( !StopUartReceive )
 	{
-		rx_uart (*pfd, rx_buffer, 6);
-		printf("\n\n ======= Receive ==========\n");
-		for (i = 0; i < 6; i++)
-			printf ("%d \n", rx_buffer[i]);
+		char *resultBuf = rx_uart (*pfd, rx_buffer, 6);
+//		int i = 0;
+//		for (;i<6;i++)
+//			printf("%d _ ", resultBuf[i]);
 
-		printf(" ===================\n\n");
-		fflush (stdout) ;
+		//printf ("reseultBuf[2] = %d\n", resultBuf[2]);
+		switch(resultBuf[2])
+		{
+		case 0x05:
+			printf("Temperature = %d\n", resultBuf[3]);
+			command[0] = 5;
+			command[1] = resultBuf[3];
+			command[2] = 0xff;
+			command[3] = 0xff;
+			command[4] = '\0';
+			nice_agent_send ( RpiData_Text->agent, RpiData_Text->streamID, 1, sizeof(command), command);
+			break;
+		default:
+			break;
+		}
+
+		fflush (stdout);
 	}
 }
 

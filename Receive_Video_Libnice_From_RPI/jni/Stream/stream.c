@@ -1,6 +1,7 @@
 #include "stream.h"
 #include "../Login/login.h"
 
+
 /* Change the content of the UI's TextView */
  void set_ui_message (const gchar *message, CustomData *data) {
   JNIEnv *env = get_jni_env ();
@@ -223,6 +224,7 @@ void check_initialization_complete (CustomData *data) {
 	video_receive_custom_data_field_id = (*env)->GetFieldID (env, klass, "video_receive_native_custom_data", "J");
 	send_audio_custom_data_field_id = (*env)->GetFieldID (env, klass, "audio_send_native_custom_data", "J");
 	set_message_method_id = (*env)->GetMethodID (env, klass, "setMessage", "(Ljava/lang/String;)V");
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "set_message_method_id = %d", set_message_method_id);
 	on_gstreamer_initialized_method_id = (*env)->GetMethodID (env, klass, "onGStreamerInitialized", "()V");
 	jclass cls = (*env)->FindClass(env, "com/gst_sdk_tutorials/tutorial_3/Communicate_Rpi");
 	set_message_from_rpi = (*env)->GetMethodID (env, cls, "receive_message_from_rpi", "(Ljava/lang/String;)V");

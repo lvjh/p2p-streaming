@@ -47,7 +47,8 @@ static JNINativeMethod native_methods[] =
   { "nativeSurfaceFinalize", "()V", (void *) gst_native_surface_finalize},
   { "nativeClassInit", "()Z", (void *) gst_native_class_init},
   { "native_request_servo_rotate", "(I)V", (void *) rotate_servo},
-  { "native_get_temperature", "()V", (void *) getTemperature}
+  { "native_get_temperature", "()V", (void *) getTemperature},
+  { "native_control_piezo", "(I)V", (void *) controlPiezosiren}
 };
 
 ///* List of implemented native methods */
@@ -83,6 +84,5 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 	(*env)->RegisterNatives (env, login_class, login_methods, G_N_ELEMENTS(login_methods));
 
 	pthread_key_create (&current_jni_env, detach_current_thread);
-
 	return JNI_VERSION_1_4;
 }

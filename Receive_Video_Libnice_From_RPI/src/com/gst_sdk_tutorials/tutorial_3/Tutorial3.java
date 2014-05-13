@@ -13,6 +13,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gstreamer.GStreamer;
@@ -27,6 +28,8 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private native void nativeSurfaceFinalize();
     private native void native_request_servo_rotate(int direction);
     private native void native_get_temperature();
+    private native void native_control_piezo(int status);
+    private int piezoStatus = 1;
     private long native_custom_data; // Native code will use this to keep private data
     private long video_receive_native_custom_data;
     private long audio_send_native_custom_data;
@@ -41,6 +44,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private boolean is_playing_desired; // Whether the user asked to go to PLAYING
     Thread getTemperature;
     private boolean isRunning = true;
+    private int old_temperature;
 
     // Called when the activity is first created.
     @Override
@@ -189,7 +193,32 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		}
 	};
 	
-	
+	 private void setMessage(final String message) 
+	 {
+	        final TextView tv = (TextView) this.findViewById(R.id.textview_message);
+	        runOnUiThread (new Runnable() {
+	          public void run() {
+	            tv.setText("Temperature = " + message);
+	          }
+	        });
+	 }
+
+	 public void PiezoOnClick(View view)
+	 {
+		 if (piezoStatus == 1)
+		 {
+		 	native_control_piezo(2);
+		 	piezoStatus = 2;
+		 }
+		 else if (piezoStatus == 2)
+		 {
+			 native_control_piezo(1);
+			 piezoStatus = 1;
+		 }
+		 
+		 Log.d("TAG", "PIEZO ONCLICK");
+	 }
+	 
     protected void onSaveInstanceState (Bundle outState) {
         Log.d ("GStreamer", "Saving state, playing:" + is_playing_desired);
         outState.putBoolean("playing", is_playing_desired);
@@ -207,10 +236,6 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		isRunning = false;
 	}
     
-	// Called from native code. This sets the content of the TextView from the UI thread.
-    private void setMessage(final String message) {
-    }
-
     // Called from native code. Native code calls this once it has created its pipeline and
     // the main loop is running, so it is ready to accept commands.
     private void onGStreamerInitialized () {

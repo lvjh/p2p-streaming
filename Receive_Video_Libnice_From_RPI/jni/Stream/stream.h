@@ -49,7 +49,7 @@ static pthread_t gst_app_thread;
 static pthread_key_t current_jni_env;
 static jfieldID video_receive_custom_data_field_id;
 static jfieldID send_audio_custom_data_field_id;
-static jmethodID set_message_method_id;
+jmethodID set_message_method_id;
 static jmethodID on_gstreamer_initialized_method_id;
 
 
@@ -151,6 +151,7 @@ int  _send_audio_parse_remote_data(NiceAgent *agent, guint streamID,
 static NiceCandidate* _send_audio_parse_candidate(char *scand, guint streamID);
 void rotate_servo (JNIEnv* env, jobject thiz, jint direction);
 void getTemperature (JNIEnv* env, jobject thiz);
+void controlPiezosiren(JNIEnv* env, jobject thiz, jint status);
 
 #endif
 
