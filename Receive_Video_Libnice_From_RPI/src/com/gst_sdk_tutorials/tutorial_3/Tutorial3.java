@@ -1,12 +1,9 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -28,6 +25,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private static native boolean nativeClassInit(); // Initialize native class: cache Method IDs for callbacks
     private native void nativeSurfaceInit(Object surface);
     private native void nativeSurfaceFinalize();
+    
     private long native_custom_data; // Native code will use this to keep private data
     private long video_receive_native_custom_data;
     private long audio_send_native_custom_data;
@@ -36,24 +34,33 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     /* Servo */
     private float prevX, prevY, totalX = 0, totalY = 0, distance;
     private int rotateThreadHoldX, rotateThreadHoldY, angle;
-    private int ROTATE_RIGHT_TO_LEFT = 0;
-    private int ROTATE_LEFT_TO_RIGHT = 1;
-    private int ROTATE_TOP_TO_BOTTOM = 2;
-    private int ROTATE_BOTTOM_TO_TOP = 3;
+    private final int ROTATE_RIGHT_TO_LEFT = 0;
+    private final int ROTATE_LEFT_TO_RIGHT = 1;
+    private final int ROTATE_TOP_TO_BOTTOM = 2;
+    private final int ROTATE_BOTTOM_TO_TOP = 3;
+    private final int ROTATE_X_AXIS = 4;
+    private final int ROTATE_Y_AXIS = 5;
+    private final int UNKNOWN_DIRECTION = 6;
     private native void native_request_servo_rotate(int direction);
+    private float x0 = 0, y0 = 0;
+    private float x1 = 0, y1 = 0;
+    private float dx, dy;
+    private int count = 0;
+    private int servoRotateDirection;
+    private final int COUNT_TO_CALC_DIRECTION = 10;
     
     /* Temperature sensor */
-    private Thread getTemperature;
+    private GetTemperature runnable;
+    private Thread getTemperatureThread;
     private boolean getTemperatureIsRunning = true;
     private native void native_get_temperature();
     
     /* Piezosiren */
-    private int PIEZO_OFF = 0x1;
-    private int PIEZO_ON  = 0x2;
+    private final int PIEZO_OFF = 0x1;
+    private final int PIEZO_ON  = 0x2;
     private int piezoStatus = PIEZO_OFF;
     private native void native_control_piezo(int status);
 
-    // Called when the activity is first created
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -76,13 +83,16 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 
         setContentView(R.layout.main);
 
+        /* Surface init */
         SurfaceView sv = (SurfaceView) this.findViewById(R.id.surface_video);
         SurfaceHolder sh = sv.getHolder();
         sh.addCallback(this);
         sv.setOnTouchListener(SurfaceviewOnTouchListener);
         
-        getTemperature = new Thread(getTempRunnable);
-        getTemperature.start();
+        /* get temperature init */
+        runnable = new GetTemperature();
+        getTemperatureThread = new Thread(runnable);
+        getTemperatureThread.start();
         
         /* Get phone screen size */
         Display display = getWindowManager().getDefaultDisplay(); 
@@ -90,7 +100,8 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         int screenHeight = display.getHeight();  // deprecated
         Log.d ("TAG", "width = " + screenWidth + " height = " + screenHeight);
         
-        rotateThreadHoldX = (screenWidth)/180;  
+        /* Servo threadhold */
+        rotateThreadHoldX = (screenWidth)/360;  
         rotateThreadHoldY = (screenHeight)*2/180;
         
         if (savedInstanceState != null) {
@@ -113,12 +124,55 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 	    	{
 				case MotionEvent.ACTION_DOWN:
 					/* Save started point*/
-					prevX = event.getX();
-					prevY = event.getY();
+					//prevX = event.getX();
+					//prevY = event.getY();
+					x0 = event.getX();
+					y0 = event.getY();
 					break;
 					
 				case MotionEvent.ACTION_MOVE:
+					if (count < COUNT_TO_CALC_DIRECTION)
+					{
+						count ++;
+						break;
+					}
+					
+					if (count == COUNT_TO_CALC_DIRECTION)
+					{
+						count++;
+						x1 = event.getX();
+						y1 = event.getY();
+						
+						/* Calc direction */
+						dx = (float) Math.sqrt((x1 - x0)*(x1 - x0));
+						dy = (float) Math.sqrt((y1 - y0)*(y1 - y0));
+						
+						Log.d("TAG", "dx = " + dx + ", dy = " + dy);
+						
+						/* x axis */
+						if (dx >= 4*dy)
+						{
+							servoRotateDirection = ROTATE_X_AXIS;
+						}
+						/* y axis */
+						else if(dy >= 4*dx)
+						{
+							servoRotateDirection = ROTATE_Y_AXIS;
+						}
+						else 
+						{
+							Log.d ("TAG", "Unknown direction!");
+							servoRotateDirection = UNKNOWN_DIRECTION;
+						}
+						
+						prevX = event.getX();
+						prevY = event.getY();
+						
+						break;
+					}
+					
 					float x,y;
+
 					x = event.getX();
 					y = event.getY();
 					
@@ -127,23 +181,22 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 					
 					totalX += dx;
 					totalY += dy;
-					
+										
 					/* If distance lager than threadhold -> rotate servo */
-					//if (distance > rotateThreadHold)
-					if (Math.abs(totalX) > rotateThreadHoldX)
+					if ((Math.abs(totalX) > rotateThreadHoldX) && (servoRotateDirection == ROTATE_X_AXIS))
 					{
-						Log.d ("TAG", "totoalX = " + totalX);
+						Log.d ("TAG", "totalX = " + totalX);
 						
 						/* Rotate 5 degree a time */
 						if (totalX < 0)
 							native_request_servo_rotate (ROTATE_RIGHT_TO_LEFT);
 						else
 							native_request_servo_rotate (ROTATE_LEFT_TO_RIGHT);
-						
+
 						totalX = 0;
 					}
-					
-					if (Math.abs(totalY) > rotateThreadHoldY)
+										
+					if ((Math.abs(totalY) > rotateThreadHoldY) && (servoRotateDirection == ROTATE_Y_AXIS))
 					{
 						Log.d ("TAG", "totalY = " + totalY);
 						
@@ -152,15 +205,18 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 							native_request_servo_rotate (ROTATE_BOTTOM_TO_TOP);
 						else
 							native_request_servo_rotate (ROTATE_TOP_TO_BOTTOM);
-						
+
 						totalY = 0;
 					}
-					
+										
 					prevX = x;
 					prevY = y;
-					
+										
 					break;
 					
+				case MotionEvent.ACTION_UP:
+					count = 0;
+					break;
 				default:
 					break;
 			}
@@ -169,28 +225,37 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		}
 	};
     
-    /* Thread to send control to get temperature from Rpi */
-    Runnable getTempRunnable = new Runnable() 
-    {
-		@Override
-		public void run() {
-			while (getTemperatureIsRunning)
+	
+	/* Get temperature class */
+	private class GetTemperature implements Runnable
+	{
+		private boolean isRunning = false;
+		
+		public GetTemperature() 
+		{
+			isRunning = true;
+		}
+		
+		public void run() 
+		{
+			while(isRunning)
 			{
 				native_get_temperature();
 				
-				try 
-				{
+				/* Delay 1s */
+				try {
 					Thread.sleep(1000);
-				} 
-				catch (InterruptedException e) 
-				{
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
-			
-			Log.d("TAG", "Stop get temperature!");
 		}
-	};
+		
+		public void terminateThread()
+		{
+			isRunning = false;
+		}
+	}
 	
 	/* Display Temperature */
 	 private void setMessage(final String message) 
@@ -206,7 +271,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 	 }
 
 	 /* Control piezosiren */
-	 public void PiezoOnClick(View view)
+	 public void PiezoOnClick (View view)
 	 {
 		 if (piezoStatus == PIEZO_OFF)
 		 {
@@ -224,7 +289,23 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 	protected void onStop() 
 	{
    		super.onStop();
-   		getTemperatureIsRunning = false;
+   		
+   		/* Stop get temperature thread */
+		 if (getTemperatureThread != null) 
+		 {
+			 runnable.terminateThread();
+		     
+			 try 
+			 {
+				 getTemperatureThread.join();
+			 } 
+			 catch (InterruptedException e) 
+			 {
+				 e.printStackTrace();
+			 }
+			 
+			 Log.d("TAG", "Stop get temperature!");
+		 }
    	}
     
     protected void onDestroy() 

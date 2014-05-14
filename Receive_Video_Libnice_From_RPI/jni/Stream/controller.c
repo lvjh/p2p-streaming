@@ -24,7 +24,7 @@ static int _text_receive_ClientThread();
 #define SERVO_COMMAND 0x03
 #define SERVO_01 1
 #define SERVO_02 2
-#define DEGREE_PER_ROTATE 5
+#define DEGREE_PER_ROTATE 8
 
 #define GETTEMP_COMMAND 0x05
 
