@@ -1,6 +1,8 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -10,6 +12,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +35,15 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private long video_receive_native_custom_data;
     private long audio_send_native_custom_data;
     private boolean is_playing_desired; // Whether the user asked to go to PLAYING
+    
+    /* Setting Option */
+    private RelativeLayout settingLayout;
+    private Button settingButton;
+    
+    /* Progress bar*/
+    private ProgressBar videoWaitingProgressbar;
+    private Thread checkVideoAvailableThread;
+    private boolean isVideoAvailable = false;
     
     /* Servo */
     private float prevX, prevY, totalX = 0, totalY = 0, distance;
@@ -68,10 +81,6 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private int pumpStatus = PUMP_OFF;
     private native void native_pump_controller (int status);
     
-    /**/
-    private RelativeLayout settingLayout;
-    
-
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -94,9 +103,18 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 
         setContentView(R.layout.main);
 
-        /**/
+        /* Setting Layout */
         settingLayout = (RelativeLayout) findViewById(R.id.settingLayout);
         settingLayout.setVisibility(View.GONE);
+        settingButton = (Button) findViewById(R.id.settingbtn);
+        settingButton.setVisibility(View.GONE);
+        
+        /* Video waiting progress bar */
+        videoWaitingProgressbar = (ProgressBar) findViewById(R.id.progressBar1);
+        Drawable drawableProgress = getResources().getDrawable(R.drawable.greenprogress);
+        videoWaitingProgressbar.setProgressDrawable(drawableProgress);
+        checkVideoAvailableThread = new Thread(CheckVideoAvailable);
+        checkVideoAvailableThread.start();
         
         /* Surface init */
         SurfaceView sv = (SurfaceView) this.findViewById(R.id.surface_video);
@@ -270,6 +288,24 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 			isRunning = false;
 		}
 	}
+	
+	/* Check video available class */
+	Runnable CheckVideoAvailable  = new  Runnable() {
+		
+		@Override
+		public void run() {
+			while(!isVideoAvailable);
+			Log.d("TAG", "OK, Video available!");
+			
+			runOnUiThread(new Runnable() {
+				public void run() {
+					videoWaitingProgressbar.setVisibility(View.GONE);
+					settingButton.setVisibility(View.VISIBLE);
+				}
+			});
+		}
+		
+	};
 	
 	/* Display Temperature */
 	 private void setMessage(final String message) 

@@ -45,40 +45,50 @@
   	  	      android:layout_below="@id/settingbtn"
   	  	      android:layout_marginTop="10dp"
   			  android:background="@drawable/settingbackground"
-  			  android:id="@+id/settingLayout"
-  	  	      >
-  	  	      <TextView
-		   	      android:id="@+id/textview_message"
-		   	      android:textSize="15dp"
-		   	      android:layout_width="match_parent"
-		   	      android:layout_height="wrap_content"
-		   	      android:text="Temperature = 50 oC"
-		   	      android:layout_marginTop="20dp"
-		   	      android:layout_marginLeft="20dp"
-		   	      android:textColor="#ffffff"
-		   	      />  
+  			  android:id="@+id/settingLayout">
+  			  
+		      <TextView
+		      android:id="@+id/textview_message"
+		      android:textSize="15dp"
+		      android:layout_width="match_parent"
+		      android:layout_height="wrap_content"
+		      android:text="Temperature = 50 oC"
+		      android:layout_marginTop="20dp"
+		      android:layout_marginLeft="20dp"
+		      android:textColor="#ffffff"
+		      />  
    	      
-	   	  		<Button
-	   	  		    android:id="@+id/piezoBtn"
-	   	  		    android:layout_width="125dp"
-	   	  		    android:layout_height="40dp"
-	   	  		    android:layout_below="@+id/textview_message"
-	   	  		    android:onClick="PiezoOnClick"
-	   	  		    android:text="PIEZOSIREN" 
-	   	  		     android:layout_marginTop="10dp"
-	   	  		       android:layout_marginLeft="20dp"
-	   	  		       android:background="@drawable/dialog_bg"/>
+   	  		<Button
+   	  		    android:id="@+id/piezoBtn"
+   	  		    android:layout_width="125dp"
+   	  		    android:layout_height="40dp"
+   	  		    android:layout_below="@+id/textview_message"
+   	  		    android:onClick="PiezoOnClick"
+   	  		    android:text="PIEZOSIREN" 
+   	  		    android:layout_marginTop="10dp"
+   	  		    android:layout_marginLeft="20dp"
+   	  		    android:background="@drawable/dialog_bg"/>
 		   	      
-		   	   <Button 
-		   	       android:layout_width="125dp"
-		   	         android:layout_height="40dp"
-		   	       android:text="PUMP"
-		   	       android:onClick="PumpOnclickListener"
-		   	       android:layout_below="@id/piezoBtn"
-		   	        android:layout_marginTop="10dp"
-		   	          android:layout_marginLeft="20dp"
-		   	          android:background="@drawable/dialog_bg"/>
+	   	   <Button 
+	   	       android:layout_width="125dp"
+	   	       android:layout_height="40dp"
+	   	       android:text="PUMP"
+	   	       android:onClick="PumpOnclickListener"
+	   	       android:layout_below="@id/piezoBtn"
+	   	       android:layout_marginTop="10dp"
+	   	       android:layout_marginLeft="20dp"
+	   	       android:background="@drawable/dialog_bg"/>
+	   	   
   	  	  </RelativeLayout>
+
+  	  	  <ProgressBar
+  	  	      android:id="@+id/progressBar1"
+  	  	      android:layout_width="wrap_content"
+  	  	      android:layout_height="wrap_content"
+  	  	      android:layout_centerHorizontal="true"
+  	  	      android:layout_centerVertical="true"
+  	  	      style="?android:attr/progressBarStyleLarge"/>
+
 	</RelativeLayout>
    	  
 </FrameLayout>

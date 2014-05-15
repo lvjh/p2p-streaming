@@ -69,6 +69,16 @@ static void on_state_changed (GstBus *bus, GstMessage *msg, CustomData *data)
 		__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "[receive video]%s\n", message);
 		g_free (message);
 	}
+
+	/* Video is ready to play, so display it on surfaceview */
+	if (data->pipeline->current_state == GST_STATE_PLAYING)
+	{
+		__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Video is ready!");
+		JNIEnv *env = get_jni_env ();
+		jclass cls = (*env)->GetObjectClass(env, data->app);
+		jfieldID video_available_field_id = (*env)->GetFieldID (env, cls, "isVideoAvailable", "Z");
+		(*env)->SetBooleanField(env, data->app, video_available_field_id, JNI_TRUE);
+	}
 }
 
 static void

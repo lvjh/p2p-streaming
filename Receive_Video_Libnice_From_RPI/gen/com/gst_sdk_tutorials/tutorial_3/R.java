@@ -23,31 +23,33 @@ public final class R {
         public static final int dialog_button_background=0x7f020006;
         public static final int dialog_button_pressed=0x7f020007;
         public static final int edittext=0x7f020008;
-        public static final int gst_sdk_icon=0x7f020009;
-        public static final int ic_action_overflow=0x7f02000a;
-        public static final int ic_action_overflow_clicked=0x7f02000b;
-        public static final int offline=0x7f02000c;
-        public static final int online=0x7f02000d;
-        public static final int setting=0x7f02000e;
-        public static final int settingbackground=0x7f02000f;
+        public static final int greenprogress=0x7f020009;
+        public static final int gst_sdk_icon=0x7f02000a;
+        public static final int ic_action_overflow=0x7f02000b;
+        public static final int ic_action_overflow_clicked=0x7f02000c;
+        public static final int offline=0x7f02000d;
+        public static final int online=0x7f02000e;
+        public static final int setting=0x7f02000f;
+        public static final int settingbackground=0x7f020010;
     }
     public static final class id {
         public static final int buttonLogin=0x7f080006;
-        public static final int communicate_rpi=0x7f08000f;
+        public static final int communicate_rpi=0x7f080010;
         public static final int editPassword=0x7f080005;
         public static final int editToRpi=0x7f080001;
         public static final int editUserName=0x7f080004;
-        public static final int headerLinearLay=0x7f08000c;
+        public static final int headerLinearLay=0x7f08000d;
         public static final int piezoBtn=0x7f08000b;
+        public static final int progressBar1=0x7f08000c;
         public static final int send_message=0x7f080002;
         public static final int settingLayout=0x7f080009;
         public static final int settingbtn=0x7f080008;
-        public static final int status=0x7f08000d;
+        public static final int status=0x7f08000e;
         public static final int surface_video=0x7f080007;
         public static final int textView1=0x7f080000;
         public static final int textView2=0x7f080003;
         public static final int textview_message=0x7f08000a;
-        public static final int usernameTextView=0x7f08000e;
+        public static final int usernameTextView=0x7f08000f;
     }
     public static final class layout {
         public static final int comunicate_rpi=0x7f030000;

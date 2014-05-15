@@ -52,7 +52,6 @@ static jfieldID send_audio_custom_data_field_id;
 jmethodID set_message_method_id;
 static jmethodID on_gstreamer_initialized_method_id;
 
-
 GMainLoop *gloop;
 GIOChannel* io_stdin;
 jmethodID set_message_from_rpi;
