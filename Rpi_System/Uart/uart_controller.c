@@ -29,3 +29,10 @@ void uart_control_piezosiren (int state)
 	//printf ("Send to get temp done!\n");
 }
 
+void uart_control_pump (int state)
+{
+	/* Send command */
+	control_pump (rpi_hardware.uart.uart_fd, state);
+	//printf ("Send to get temp done!\n");
+}
+

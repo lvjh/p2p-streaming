@@ -7,11 +7,13 @@
 	        android:id="@+id/surface_video"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"/>
+    	
 	<RelativeLayout 
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent">
-	    <TextView
+	  <!--  <TextView
    	      android:id="@+id/textview_message"
+   	      android:textSize="20dp"
    	      android:layout_width="match_parent"
    	      android:layout_height="wrap_content"/>  
    	      
@@ -21,7 +23,62 @@
    	      android:layout_height="wrap_content"
    	      android:text="piezo"
    	      android:onClick="PiezoOnClick"
-   	      android:layout_below="@+id/textview_message"/>
+   	      android:layout_below="@+id/textview_message"/> 
+   	      
+   	   <Button 
+   	       android:layout_width="wrap_content"
+   	       android:layout_height="wrap_content"
+   	       android:text="Pump"
+   	       android:onClick="PumpOnclickListener"
+   	       android:layout_below="@id/piezoBtn"/>
+   	       -->
+   	      <Button 
+   	          android:id="@+id/settingbtn"
+   	          android:layout_width="wrap_content"
+   	          android:layout_height="wrap_content"
+   	          android:background="@drawable/setting"
+   	          android:onClick="SettingOnclickListener"/>
+   	      
+  	  	  <RelativeLayout 
+  	  	      android:layout_width="200dp"
+  	  	      android:layout_height="200dp"
+  	  	      android:layout_below="@id/settingbtn"
+  	  	      android:layout_marginTop="10dp"
+  			  android:background="@drawable/settingbackground"
+  			  android:id="@+id/settingLayout"
+  	  	      >
+  	  	      <TextView
+		   	      android:id="@+id/textview_message"
+		   	      android:textSize="15dp"
+		   	      android:layout_width="match_parent"
+		   	      android:layout_height="wrap_content"
+		   	      android:text="Temperature = 50 oC"
+		   	      android:layout_marginTop="20dp"
+		   	      android:layout_marginLeft="20dp"
+		   	      android:textColor="#ffffff"
+		   	      />  
+   	      
+	   	  		<Button
+	   	  		    android:id="@+id/piezoBtn"
+	   	  		    android:layout_width="125dp"
+	   	  		    android:layout_height="40dp"
+	   	  		    android:layout_below="@+id/textview_message"
+	   	  		    android:onClick="PiezoOnClick"
+	   	  		    android:text="PIEZOSIREN" 
+	   	  		     android:layout_marginTop="10dp"
+	   	  		       android:layout_marginLeft="20dp"
+	   	  		       android:background="@drawable/dialog_bg"/>
+		   	      
+		   	   <Button 
+		   	       android:layout_width="125dp"
+		   	         android:layout_height="40dp"
+		   	       android:text="PUMP"
+		   	       android:onClick="PumpOnclickListener"
+		   	       android:layout_below="@id/piezoBtn"
+		   	        android:layout_marginTop="10dp"
+		   	          android:layout_marginLeft="20dp"
+		   	          android:background="@drawable/dialog_bg"/>
+  	  	  </RelativeLayout>
 	</RelativeLayout>
    	  
 </FrameLayout>

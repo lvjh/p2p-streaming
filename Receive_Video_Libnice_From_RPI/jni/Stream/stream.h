@@ -152,6 +152,7 @@ static NiceCandidate* _send_audio_parse_candidate(char *scand, guint streamID);
 void rotate_servo (JNIEnv* env, jobject thiz, jint direction);
 void getTemperature (JNIEnv* env, jobject thiz);
 void controlPiezosiren(JNIEnv* env, jobject thiz, jint status);
+void pumpController (JNIEnv* env, jobject thiz, jint status);
 
 #endif
 

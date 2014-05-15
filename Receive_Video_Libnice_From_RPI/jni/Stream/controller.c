@@ -21,6 +21,8 @@ CustomData *mData;
 static int _text_receive_ClientThread();
 
 #define PIEZO_COMMAND 0x01
+#define PUMP_COMMAND 0x02
+
 #define SERVO_COMMAND 0x03
 #define SERVO_01 1
 #define SERVO_02 2
@@ -389,6 +391,27 @@ void controlPiezosiren(JNIEnv* env, jobject thiz, jint status)
 	/* Send command to RPI */
 	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
 	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren done... !");
+}
+
+/* Pump controller */
+void pumpController (JNIEnv* env, jobject thiz, jint status)
+{
+	if (controller_gathering_done == FALSE)
+		return;
+
+	gchar *command;
+	command = (gchar*)malloc(sizeof(gchar)*5);
+
+	/* Command id */
+	command[0] = PUMP_COMMAND;
+	command[1] = status;
+	command[2] = 0xff;
+	command[3] = 0xff;
+	command[4] = '\0';
+
+	/* Send command to RPI */
+	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
+	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control pumb done... !");
 }
 
 static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint component_id,

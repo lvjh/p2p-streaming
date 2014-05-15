@@ -48,7 +48,8 @@ static JNINativeMethod native_methods[] =
   { "nativeClassInit", "()Z", (void *) gst_native_class_init},
   { "native_request_servo_rotate", "(I)V", (void *) rotate_servo},
   { "native_get_temperature", "()V", (void *) getTemperature},
-  { "native_control_piezo", "(I)V", (void *) controlPiezosiren}
+  { "native_control_piezo", "(I)V", (void *) controlPiezosiren},
+  { "native_pump_controller", "(I)V", (void *) pumpController}
 };
 
 ///* List of implemented native methods */

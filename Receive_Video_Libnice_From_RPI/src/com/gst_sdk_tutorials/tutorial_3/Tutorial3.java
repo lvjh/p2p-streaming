@@ -10,6 +10,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +61,16 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private final int PIEZO_ON  = 0x2;
     private int piezoStatus = PIEZO_OFF;
     private native void native_control_piezo(int status);
+    
+    /* Pumb */
+    private final int PUMP_ON = 0x01;
+    private final int PUMP_OFF = 0x02;
+    private int pumpStatus = PUMP_OFF;
+    private native void native_pump_controller (int status);
+    
+    /**/
+    private RelativeLayout settingLayout;
+    
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -83,6 +94,10 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 
         setContentView(R.layout.main);
 
+        /**/
+        settingLayout = (RelativeLayout) findViewById(R.id.settingLayout);
+        settingLayout.setVisibility(View.GONE);
+        
         /* Surface init */
         SurfaceView sv = (SurfaceView) this.findViewById(R.id.surface_video);
         SurfaceHolder sh = sv.getHolder();
@@ -225,7 +240,6 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		}
 	};
     
-	
 	/* Get temperature class */
 	private class GetTemperature implements Runnable
 	{
@@ -265,11 +279,23 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 	        {
 				public void run() 
 				{
-					tv.setText("Temperature = " + message);
+					tv.setText("Temperature = "  + message + " oC");
 				}
 	        });
 	 }
 
+	 public void SettingOnclickListener(View view)
+	 {
+		 if (settingLayout.getVisibility() == view.GONE)
+		 {
+			 settingLayout.setVisibility(View.VISIBLE);
+		 }
+		 else
+		 {
+			 settingLayout.setVisibility(View.GONE);
+		 }
+	 }
+	 
 	 /* Control piezosiren */
 	 public void PiezoOnClick (View view)
 	 {
@@ -282,6 +308,22 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		 {
 			 native_control_piezo(PIEZO_OFF);
 			 piezoStatus = PIEZO_OFF;
+		 }
+	 }
+	 
+	 /* Pump controller */
+	 public void PumpOnclickListener(View view)
+	 {
+
+		 if (pumpStatus == PUMP_OFF)
+		 {
+		 	native_pump_controller(PUMP_ON);
+		 	pumpStatus = PUMP_ON;
+		 }
+		 else if (pumpStatus == PUMP_ON)
+		 {
+			 native_pump_controller(PUMP_OFF);
+			 pumpStatus = PUMP_OFF;
 		 }
 	 }
 	 

@@ -22,6 +22,7 @@ int sConnect;
 static int _text_receive_ClientThread();
 
 #define PIEZOSIREN_COMMAND 0x01
+#define PUMP_COMMAND 0x02
 #define SERVO_COMMAND 0x03
 #define GETTEMP_COMMAND 0x05
 
@@ -393,6 +394,12 @@ static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint 
 		{
 			printf ("Receive piezosiren command\n");
 			uart_control_piezosiren(buf[1]);
+			break;
+		}
+		case PUMP_COMMAND:
+		{
+			printf ("Receive pumb command\n");
+			uart_control_pump (buf[1]);
 			break;
 		}
 		default:
