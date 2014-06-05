@@ -1,7 +1,15 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,13 +17,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
+/**
+ * Login to server
+ * If login is successful then list rpis is online,
+ * and save user&password
+ */
 public class Login extends Activity 
 {
 	private EditText mUsername, mPassword;
+	
 	private Button mLoginButton;
+	
+	private final int LOGIN_SUCCESSED = 0x00;
+	
+	private final int LOGIN_FAILED = 0x01;
+	
 	private native int nativeLogin (String mUsername, String mPassword);
+	
+	private native String nativeListOnlineClient (String username);
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -27,6 +48,9 @@ public class Login extends Activity
 		mPassword = (EditText) findViewById(R.id.editPassword);
 		mLoginButton = (Button) findViewById(R.id.buttonLogin);
 		
+		/*
+		 * Get old correct username, password
+		 */
 		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 		mUsername.setText(sharedPref.getString("USERNAME", null));
 		mPassword.setText(sharedPref.getString("PASSWORD", null));
@@ -37,31 +61,70 @@ public class Login extends Activity
 	{
 		int ret = nativeLogin(mUsername.getText().toString(), mPassword.getText().toString());
 		
-		if (ret == 0)
-		{
-			Log.i("TAG", "Login sucess!");
-			Intent intent = new Intent(this, Tutorial3.class);
-			startActivity(intent);
+		switch (ret) {
+		
+		case LOGIN_SUCCESSED:
 			
-			/*
-			 * Save username & password
+			//Log.i("TAG", "Login sucess!");
+			
+			String result = nativeListOnlineClient(mUsername.getText().toString());
+			
+			/* 
+			 * Save username & password 
 			 */
 			SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 			SharedPreferences.Editor editor = sharedPref.edit();
 			editor.putString("USERNAME", mUsername.getText().toString());
 			editor.putString("PASSWORD", mPassword.getText().toString());
 			editor.commit();
-		}
-		else if (ret == 1)
-		{
+			
+			/*
+			 * Call ClientState Activity enclose data
+			 */
+			
+			Intent intent = new Intent(this, ClientState.class);
+			intent.putExtra("Clients Information", result);
+			startActivity(intent);
+			
+			break;
+			
+		case LOGIN_FAILED:
+			
 			/*
 			 * Couldn't connect to server because wrong input or 
 			 * server failed.
 			 */
-			Toast.makeText(this, "Username or Password is not correct", 
-					Toast.LENGTH_SHORT).show();
+			DialogFragment dialog = new LoginFailedDialogFragment();
+			dialog.show(getFragmentManager(), null);
+			
+			break;
+			
+		default:
+			break;
 		}
 	}	
+	
+	/**
+	 * Dialog show when login failed
+	 */
+	public static class LoginFailedDialogFragment extends DialogFragment {
+		
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) 
+	    {
+	        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	        builder.setMessage("Username or password is incorrect.");
+	        builder.setPositiveButton("Ok", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dismiss();
+				}
+			});
+	               
+	        return builder.create();
+	    }
+	}
 	
 	static 
 	{

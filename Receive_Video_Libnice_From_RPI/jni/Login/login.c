@@ -1,4 +1,5 @@
 #include "login.h"
+#include <stdio.h>
 
 int connect_with_timeout(char *host, int port, int timeout_sec,
 		int timeout_usec, char *account)
@@ -107,3 +108,31 @@ int login_to_server(JNIEnv *env, jobject thiz, jstring _username, jstring _passw
 
 }
 
+/**
+ * List status (online/offline) of all clients
+ */
+jstring list_online_client(JNIEnv *env, jobject thiz, jstring _username)
+{
+	char sender[181] = {0};
+	char info[524] = {0};
+	char receiveBuffer[524] = {0};
+	char *tmp, *tmp1;
+
+	const char *username = (*env)->GetStringUTFChars( env, _username , NULL);
+
+	sprintf(info, "003$%s$%s", username, username);
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
+	Base64Encode(info, sender, BUFFFERLEN);
+	send(global_socket, sender, 181, NULL);
+	recv(global_socket, receiveBuffer, 524, NULL);
+	Base64Decode(receiveBuffer, info, BUFFFERLEN);
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
+	tmp = strtok(info, "$");
+	tmp = strtok(NULL, "$");
+	tmp = strtok(NULL, "$");
+	tmp = strtok(NULL, "$");
+	tmp = strtok(NULL, "$");
+	tmp = strtok(NULL, "$");//result
+
+	jstring result =  (*env)->NewStringUTF(env, tmp);
+}

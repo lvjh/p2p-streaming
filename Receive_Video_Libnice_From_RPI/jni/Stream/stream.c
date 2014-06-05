@@ -296,3 +296,9 @@ void gst_native_surface_finalize (JNIEnv *env, jobject thiz)
 }
 
 
+void close_server_socket (JNIEnv *env, jobject thiz)
+{
+	/* close socket */
+	shutdown(global_socket, 2);
+}
+

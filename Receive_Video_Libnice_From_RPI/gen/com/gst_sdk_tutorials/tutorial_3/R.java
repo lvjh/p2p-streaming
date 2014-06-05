@@ -33,29 +33,36 @@ public final class R {
         public static final int settingbackground=0x7f020010;
     }
     public static final class id {
-        public static final int buttonLogin=0x7f080006;
-        public static final int communicate_rpi=0x7f080010;
-        public static final int editPassword=0x7f080005;
-        public static final int editToRpi=0x7f080001;
-        public static final int editUserName=0x7f080004;
-        public static final int headerLinearLay=0x7f08000d;
-        public static final int piezoBtn=0x7f08000b;
-        public static final int progressBar1=0x7f08000c;
-        public static final int send_message=0x7f080002;
-        public static final int settingLayout=0x7f080009;
-        public static final int settingbtn=0x7f080008;
-        public static final int status=0x7f08000e;
-        public static final int surface_video=0x7f080007;
-        public static final int textView1=0x7f080000;
-        public static final int textView2=0x7f080003;
-        public static final int textview_message=0x7f08000a;
-        public static final int usernameTextView=0x7f08000f;
+        public static final int buttonLogin=0x7f08000b;
+        public static final int button_connect_to=0x7f080006;
+        public static final int client_state_listview_id=0x7f080000;
+        public static final int communicate_rpi=0x7f080015;
+        public static final int editPassword=0x7f08000a;
+        public static final int editToRpi=0x7f080002;
+        public static final int editUserName=0x7f080009;
+        public static final int headerLinearLay=0x7f080012;
+        public static final int imgView_client_status=0x7f080005;
+        public static final int login_layout=0x7f080008;
+        public static final int piezoBtn=0x7f080010;
+        public static final int progressBar1=0x7f080011;
+        public static final int send_message=0x7f080003;
+        public static final int settingLayout=0x7f08000e;
+        public static final int settingbtn=0x7f08000d;
+        public static final int status=0x7f080013;
+        public static final int surface_video=0x7f08000c;
+        public static final int textView1=0x7f080001;
+        public static final int textView2=0x7f080004;
+        public static final int textview_message=0x7f08000f;
+        public static final int tv_client_name=0x7f080007;
+        public static final int usernameTextView=0x7f080014;
     }
     public static final class layout {
-        public static final int comunicate_rpi=0x7f030000;
-        public static final int login_layout=0x7f030001;
-        public static final int main=0x7f030002;
-        public static final int rpi_status=0x7f030003;
+        public static final int clients_state_layout=0x7f030000;
+        public static final int comunicate_rpi=0x7f030001;
+        public static final int listview_item=0x7f030002;
+        public static final int login_layout=0x7f030003;
+        public static final int main=0x7f030004;
+        public static final int rpi_status=0x7f030005;
     }
     public static final class menu {
         public static final int menu=0x7f070000;

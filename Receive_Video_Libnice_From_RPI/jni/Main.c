@@ -15,8 +15,8 @@ JNIEnv *attach_current_thread (void)
   __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "java_vm = %d, env = %d, args = %d", java_vm, env, args);
   if ((*java_vm)->AttachCurrentThread (java_vm, &env, &args) < 0)
   {
-    GST_ERROR ("Failed to attach current thread");
-    return NULL;
+	GST_ERROR ("Failed to attach current thread");
+	return NULL;
   }
 
   return env;
@@ -68,7 +68,13 @@ static JNINativeMethod native_methods[] =
 
 static JNINativeMethod login_methods[] =
 {
-		{ "nativeLogin", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)login_to_server }
+		{ "nativeLogin", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)login_to_server },
+		{ "nativeListOnlineClient", "(Ljava/lang/String;)Ljava/lang/String;", (void *)list_online_client}
+};
+
+static JNINativeMethod client_state_methods[] =
+{
+		{ "nativeCloseSocket", "()V", (void *) close_server_socket }
 };
 
 /* Library initializer */
@@ -87,10 +93,12 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 	jclass main_class = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Tutorial3");
 	//jclass llass = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Communicate_Rpi");
 	jclass login_class = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/Login");
+	jclass client_state_class = (*env)->FindClass (env, "com/gst_sdk_tutorials/tutorial_3/ClientState");
 
 	(*env)->RegisterNatives (env, main_class, native_methods, G_N_ELEMENTS(native_methods));
 	//(*env)->RegisterNatives (env, llass, lnative_methods, G_N_ELEMENTS(lnative_methods));
 	(*env)->RegisterNatives (env, login_class, login_methods, G_N_ELEMENTS(login_methods));
+	(*env)->RegisterNatives (env, client_state_class, client_state_methods, G_N_ELEMENTS(client_state_methods));
 
 	pthread_key_create (&current_jni_env, detach_current_thread);
 	return JNI_VERSION_1_4;

@@ -26,4 +26,6 @@ int connect_with_timeout(char *host, int port, int timeout_sec,
 
 int login_to_server (JNIEnv *env, jobject thiz, jstring _username, jstring _password);
 
+jstring list_online_client(JNIEnv *env, jobject thiz, jstring _username);
+
 #endif /* LOGIN_H_ */
