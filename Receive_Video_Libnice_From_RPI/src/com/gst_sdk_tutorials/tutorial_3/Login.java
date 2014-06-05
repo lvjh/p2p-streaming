@@ -84,6 +84,7 @@ public class Login extends Activity
 			
 			Intent intent = new Intent(this, ClientState.class);
 			intent.putExtra("Clients Information", result);
+			intent.putExtra("username", mUsername.getText().toString());
 			startActivity(intent);
 			
 			break;

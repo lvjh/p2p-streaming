@@ -1,6 +1,7 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 	/** 
 	 * Gstreamer 
 	 */
-	private native void nativeInit(); // Initialize native code, build pipeline, etc
+	private native void nativeInit(String userName, String rpiName); // Initialize native code, build pipeline, etc
     private native void nativeFinalize(); // Destroy pipeline and shutdown native code
     private native void nativePlay(); // Set pipeline to PLAYING
     private native void nativePause(); // Set pipeline to PAUSED
@@ -126,6 +127,15 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 
         setContentView(R.layout.main);
 
+        /*
+         * Get intent
+         */
+        Intent intent = getIntent();
+        String rpiName = intent.getStringExtra("rpi_name");
+        String userName = intent.getStringExtra("user_name");
+        
+        Log.i("", "username = " + userName + ", rpiname = " + rpiName);
+        
         /* Setting Layout */
         settingLayout = (RelativeLayout) findViewById(R.id.settingLayout);
         settingLayout.setVisibility(View.GONE);
@@ -182,7 +192,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         /*
          * Initialize gstreamer application
          */
-        nativeInit();
+        nativeInit(userName, rpiName);
     }
 
     /**

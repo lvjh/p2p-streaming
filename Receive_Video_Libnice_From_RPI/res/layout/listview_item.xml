@@ -7,13 +7,16 @@
         android:id="@+id/imgView_client_status"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:src="@drawable/offline"/>
+        android:src="@drawable/offline"
+        android:layout_centerInParent="true"
+        android:layout_alignParentLeft="true"/>
     
      <Button 
         android:id="@+id/button_connect_to"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
         android:text="Connect"/>
      
     <TextView 
@@ -22,6 +25,9 @@
         android:layout_height="wrap_content"
 		android:layout_toLeftOf="@id/button_connect_to"
 		android:layout_toRightOf="@id/imgView_client_status"
+		android:layout_marginLeft="10dp"
+		android:layout_centerInParent="true"
+		android:textSize="20sp"
 		android:text="rpi001"
 		/>
 </RelativeLayout>

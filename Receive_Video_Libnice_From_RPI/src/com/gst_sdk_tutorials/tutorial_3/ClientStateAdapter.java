@@ -3,10 +3,11 @@ package com.gst_sdk_tutorials.tutorial_3;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -16,11 +17,15 @@ public class ClientStateAdapter extends BaseAdapter{
 
 	private ArrayList<ClientInfo> mClientArralist;
 	
+	private String mUserName;
+	
 	private Context mContext;
 	
-	public ClientStateAdapter(Context contex, ArrayList<ClientInfo> clientArraylist) {
+	public ClientStateAdapter(Context contex, ArrayList<ClientInfo> clientArraylist,
+			String userName) {
 		this.mContext = contex;
 		this.mClientArralist = clientArraylist;
+		this.mUserName = userName;
 	}
 
 	@Override
@@ -51,10 +56,24 @@ public class ClientStateAdapter extends BaseAdapter{
 			mConnectTo  = (Button) view.findViewById(R.id.button_connect_to);
 			
 			/*
-			 * Iplement client listener 
+			 * Implement client listener 
 			 */
+			mConnectTo.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View view) {
+					/*
+					 * Start Tutorial3 activity
+					 */
+					Intent intent = new Intent(mContext, Tutorial3.class);
+					intent.putExtra("rpi_name", mClientName.getText().toString());
+					intent.putExtra("user_name", mUserName);
+					mContext.startActivity(intent);
+				}
+			});
 		}
 	}
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		
@@ -87,8 +106,13 @@ public class ClientStateAdapter extends BaseAdapter{
 		 */
 		holder.mClientName.setText(mClientArralist.get(position).getmClientName());
 		
+		/*
+		 * Set button
+		 */
+		if (mClientArralist.get(position).getmClientState() == ClientInfo.OFFLINE)
+			holder.mConnectTo.setEnabled(false);
+		
 		return convertView;
 	}
-
 
 }

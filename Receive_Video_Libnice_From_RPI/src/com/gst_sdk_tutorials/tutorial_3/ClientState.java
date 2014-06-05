@@ -26,6 +26,7 @@ public class ClientState extends Activity {
 		 */
 		Intent intent = getIntent();
 		String result = intent.getStringExtra("Clients Information");
+		String username = intent.getStringExtra("username");
 		
 		/*
 		 * Get clients one by one
@@ -46,7 +47,7 @@ public class ClientState extends Activity {
 			}
 		}
 		
-		ClientStateAdapter adapter = new ClientStateAdapter(this, mClientArray);
+		ClientStateAdapter adapter = new ClientStateAdapter(this, mClientArray, username);
 		mListview = (ListView) findViewById(R.id.client_state_listview_id);
 		mListview.setAdapter(adapter);
 		

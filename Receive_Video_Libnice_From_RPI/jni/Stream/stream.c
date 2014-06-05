@@ -139,7 +139,10 @@ void check_initialization_complete (CustomData *data) {
  */
 
 /* Instruct the native code to create its internal data structure, pipeline and thread */
- void gst_native_init (JNIEnv* env, jobject thiz) {
+ void gst_native_init (JNIEnv* env, jobject thiz, jstring _client_name, jstring _rpi_name) {
+
+  client_name = (*env)->GetStringUTFChars(env, _client_name, 0);
+  rpi_name = (*env)->GetStringUTFChars(env, _rpi_name, 0);
 
   GST_CUSTOM_DATA *app_data;
   app_data = g_new0 (GST_CUSTOM_DATA, 1);
@@ -286,7 +289,7 @@ void gst_native_surface_finalize (JNIEnv *env, jobject thiz)
 		GST_DEBUG ("Releasing Native Window %p", data->native_window);
 
 	if (data->video_sink) {
-		gst_x_overlay_set_window_handle (GST_X_OVERLAY (data->video_sink), (guintptr)NULL);
+		gst_x_overlay_set_window_handle (GST_X_OVERLAY (data->video_sink), (guintptr) NULL);
 		gst_element_set_state (data->pipeline, GST_STATE_READY);
 	}
 

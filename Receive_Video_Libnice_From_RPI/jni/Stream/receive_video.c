@@ -407,9 +407,11 @@ static NiceCandidate* _video_receive_parse_candidate(char *scand, guint streamID
 static int connect_to_rpi()
 {
 	char sender[181] = {0};
+	char tmp[181] = {0};
 	int rc;
 
-	rc = Base64Encode("001$ceslab$rpi001", sender, BUFFFERLEN);
+	sprintf(tmp, "001$%s$%s", client_name, rpi_name);
+	rc = Base64Encode(tmp, sender, BUFFFERLEN);
 
 	send(global_socket, sender, 181, NULL);
 	return 0;

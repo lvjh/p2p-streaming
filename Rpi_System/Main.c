@@ -3,9 +3,6 @@
 #include "P2P_Stream/stream.h"
 #include "stdio.h"
 
-
-
-
 int main()
 {
 	Rpi_setup();

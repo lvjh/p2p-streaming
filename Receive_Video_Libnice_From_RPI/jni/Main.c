@@ -47,7 +47,7 @@ JNIEnv *get_jni_env (void)
 /* List of implemented native methods */
 static JNINativeMethod native_methods[] =
 {
-  { "nativeInit", "()V", (void *) gst_native_init},
+  { "nativeInit", "(Ljava/lang/String;Ljava/lang/String;)V", (void *) gst_native_init},
   { "nativeFinalize", "()V", (void *) gst_native_finalize},
   { "nativePlay", "()V", (void *) gst_native_play},
   { "nativePause", "()V", (void *) gst_native_pause},

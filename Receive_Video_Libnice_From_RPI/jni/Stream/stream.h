@@ -60,6 +60,8 @@ gboolean video_receive_gathering_done;
 gboolean send_audio_gathering_done;
 gboolean receive_audio_gathering_done;
 gboolean controller_gathering_done;
+gchar *client_name;
+gchar *rpi_name;
 
 #define STUNSR_ADDR  "107.23.150.92"
 #define STUNSR_PORT 3478
@@ -77,7 +79,6 @@ typedef struct _CustomData {
   GstBus *bus;
   NiceAgent *agent;
   guint stream_id;
-
 } CustomData;
 
 typedef struct gst_custom_data {
@@ -204,7 +205,7 @@ void error_cb (GstBus *bus, GstMessage *msg, CustomData *data);
 void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) ;
 void check_initialization_complete (CustomData *data);
 void *app_function (void *userdata);
-void gst_native_init (JNIEnv* env, jobject thiz) ;
+void gst_native_init (JNIEnv* env, jobject thiz, jstring _client_name, jstring _rpi_name);
 void gst_native_finalize (JNIEnv* env, jobject thiz);
 void gst_native_play (JNIEnv* env, jobject thiz);
 void gst_native_pause (JNIEnv* env, jobject thiz);
