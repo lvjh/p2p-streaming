@@ -21,7 +21,7 @@ CustomData *mData;
 static int _text_receive_ClientThread();
 
 #define PIEZO_COMMAND 0x01
-#define PUMP_COMMAND 0x02
+#define PUMP_COMMAND  0x02
 
 #define SERVO_COMMAND 0x03
 #define SERVO_01 1
@@ -289,12 +289,14 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "SIGNAL: state changed %d %d %s[%d]\n",
 	stream_id, component_id, state_name[state], state);
 
-	if (state == NICE_COMPONENT_STATE_READY) {
+	if (state == NICE_COMPONENT_STATE_READY)
+	{
 		NiceCandidate *local, *remote;
 
 		// Get current selected candidate pair and print IP address used
 		if (nice_agent_get_selected_pair (agent, stream_id, component_id,
-		&local, &remote)) {
+		&local, &remote))
+		{
 			gchar ipaddr[INET6_ADDRSTRLEN];
 
 			nice_address_to_string(&local->addr, ipaddr);
@@ -309,109 +311,160 @@ static void _text_receive_cb_component_state_changed(NiceAgent *agent, guint str
 		//g_io_add_watch(io_stdin, G_IO_IN, _text_receive_stdin_send_data_cb, agent);
 		//printf("> ");
 		//fflush (stdout);
-	} else if (state == NICE_COMPONENT_STATE_FAILED)
+	}
+	else if (state == NICE_COMPONENT_STATE_FAILED)
 	{
 		__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "[text] NICE_COMPONENT_STATE_FAILED");
 		g_main_loop_quit (gloop);
 	}
 }
 
-/* Control servo */
+/*
+ * Servo Controller
+ */
 void rotate_servo (JNIEnv* env, jobject thiz, jint direction)
 {
 	// id [1], servo id[1,2], direction[+,-], dgree, end-of-string
-	 __android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send servo ... !");
-	gchar *command;
-	command = (gchar*)malloc(sizeof(gchar)*5);
+	 //__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send servo ... !");
+	/*
+	 * If Transmit component doesn't done.
+	 *  -> Exit
+	 */
+	if (controller_gathering_done == FALSE)
+		return;
 
-	/* Command id */
+	gchar *command = (gchar*)malloc(sizeof(gchar)*5);
+
+	/*
+	 * Build Command
+	 */
+
+	/*
+	 * Command ID
+	 */
 	command[0] = SERVO_COMMAND;
 
-	/* Servo number */
+	/*
+	 *  Servo number
+	 */
 	if (direction == 0 || direction == 1 )
 		command[1] = SERVO_01;
 	else if (direction == 2 || direction == 3 )
 		command[1] = SERVO_02;
 
-	/* Direction */
+	/*
+	 *  Direction
+	 */
 	if (direction == 0 || direction == 2) // right to left, top to bottom
 		command[2] = '+';
 	if (direction == 1 || direction == 3) // left to right, bottom to top
 		command[2] = '-';
 
-	/* Degree */
+	/*
+	 *  Degree
+	 */
 	command[3] = DEGREE_PER_ROTATE;
 	command[4] = '\0';
 
-	/* Send command to RPI */
+	/*
+	 *  Send command to RPI
+	 */
 	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
 
-	 __android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send servo done!");
+	// __android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send servo done!");
 }
 
-/* Get Temperature */
+/*
+ *  Temperature Controller
+ */
 void getTemperature (JNIEnv* env, jobject thiz)
 {
+	/*
+	 * If Transmit component doesn't done.
+	 *  -> Exit
+	 */
 	if (controller_gathering_done == FALSE)
 		return;
 
-	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get Temp ... !");
-	gchar *command;
-	command = (gchar*)malloc(sizeof(gchar)*5);
+	//__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get Temp ... !");
+	gchar *command = (gchar*)malloc(sizeof(gchar)*5);
 
-	/* Command id */
+	/*
+	 * Build Command
+	 */
 	command[0] = GETTEMP_COMMAND;
 	command[1] = 0xff;
 	command[2] = 0xff;
 	command[3] = 0xff;
 	command[4] = '\0';
 
-	/* Send command to RPI */
+	/*
+	 * Send command to RPI
+	 */
 	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
-	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get temp done!");
+	//__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to get temp done!");
 }
 
-/* Control Piezosiren */
+/*
+ * Piezosiren controller
+ */
 void controlPiezosiren(JNIEnv* env, jobject thiz, jint status)
 {
-	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren !");
+	//__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren !");
+
+	/*
+	 * If Transmit component doesn't done.
+	 *  -> Exit
+	 */
 	if (controller_gathering_done == FALSE)
 		return;
 
-	gchar *command;
-	command = (gchar*)malloc(sizeof(gchar)*5);
+	gchar *command = (gchar*) malloc(sizeof(gchar)*5);
 
-	/* Command id */
+	/*
+	 *  Build command
+	 */
 	command[0] = PIEZO_COMMAND;
 	command[1] = status;
 	command[2] = 0xff;
 	command[3] = 0xff;
 	command[4] = '\0';
 
-	/* Send command to RPI */
+	/*
+	 *  Send command to RPI
+	 */
 	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
-	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren done... !");
+	//__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control piezosiren done... !");
 }
 
-/* Pump controller */
+/**
+ *  Pump controller
+ */
 void pumpController (JNIEnv* env, jobject thiz, jint status)
 {
+	/*
+	 * If Transmit component doesn't done.
+	 *  -> Exit
+	 */
 	if (controller_gathering_done == FALSE)
 		return;
 
-	gchar *command;
-	command = (gchar*)malloc(sizeof(gchar)*5);
+	gchar *command = (gchar*) malloc(sizeof(gchar)*5);
 
-	/* Command id */
+	/*
+	 * Build command
+	 */
 	command[0] = PUMP_COMMAND;
 	command[1] = status;
 	command[2] = 0xff;
 	command[3] = 0xff;
 	command[4] = '\0';
 
-	/* Send command to RPI */
+	/*
+	 * Send command to RPI
+	 */
 	nice_agent_send(mData->agent, mData->stream_id, 1, sizeof(command), command);
-	__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control pumb done... !");
+	//__android_log_print (ANDROID_LOG_DEBUG, "tutorial-3", "Send to control pumb done... !");
 }
 
 static void _text_receive_cb_nice_recv(NiceAgent *agent, guint stream_id, guint component_id,
@@ -471,7 +524,8 @@ static int _text_receive_ClientThread()
 	// Request to connect Rpi
 	//send(global_socket, "001$ceslab$khtn", 181, NULL);
 
-	while (1) {
+	while (1)
+	{
 		// The server will send a struct to the client
 		// containing message and ID
 		// But send only accepts a char as buffer parameter

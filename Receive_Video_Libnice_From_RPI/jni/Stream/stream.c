@@ -278,7 +278,8 @@ void gst_native_surface_init (JNIEnv *env, jobject thiz, jobject surface)
 	__android_log_print (ANDROID_LOG_INFO, "tutorial-3", "native_surface_init done");
 }
 
- void gst_native_surface_finalize (JNIEnv *env, jobject thiz) {
+void gst_native_surface_finalize (JNIEnv *env, jobject thiz)
+{
 	CustomData *data = GET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id);
 
 	if (!data) return;

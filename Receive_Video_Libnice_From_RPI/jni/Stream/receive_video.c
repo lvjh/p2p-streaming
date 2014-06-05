@@ -147,6 +147,7 @@ void  _video_receive_init_gstreamer (NiceAgent *magent, guint streamID, CustomDa
 	g_object_set (nicesrc, "stream", streamID, NULL);
 	g_object_set (nicesrc, "component", 1, NULL);
 	g_object_set (capsfilter, "caps", gst_caps_from_string("application/x-rtp, payload=(int)96"), NULL);
+	g_object_set (video_view, "sync", FALSE, NULL);
 
 	pipeline = gst_pipeline_new("Receive Video Pipeline");
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -11,6 +12,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
+import android.view.WindowId;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -22,7 +25,9 @@ import com.gstreamer.GStreamer;
 
 public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     
-	/* Gstreamer */
+	/** 
+	 * Gstreamer 
+	 */
 	private native void nativeInit(); // Initialize native code, build pipeline, etc
     private native void nativeFinalize(); // Destroy pipeline and shutdown native code
     private native void nativePlay(); // Set pipeline to PLAYING
@@ -36,25 +41,31 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private long audio_send_native_custom_data;
     private boolean is_playing_desired; // Whether the user asked to go to PLAYING
     
-    /* Setting Option */
+    /** 
+     * Setting Option 
+     */
     private RelativeLayout settingLayout;
     private Button settingButton;
     
-    /* Progress bar*/
+    /** 
+     * Progress bar
+     */
     private ProgressBar videoWaitingProgressbar;
     private Thread checkVideoAvailableThread;
     private boolean isVideoAvailable = false;
     
-    /* Servo */
+    /** 
+     * Servo 
+     */
     private float prevX, prevY, totalX = 0, totalY = 0, distance;
     private int rotateThreadHoldX, rotateThreadHoldY, angle;
-    private final int ROTATE_RIGHT_TO_LEFT = 0;
-    private final int ROTATE_LEFT_TO_RIGHT = 1;
-    private final int ROTATE_TOP_TO_BOTTOM = 2;
-    private final int ROTATE_BOTTOM_TO_TOP = 3;
-    private final int ROTATE_X_AXIS = 4;
-    private final int ROTATE_Y_AXIS = 5;
-    private final int UNKNOWN_DIRECTION = 6;
+    private final int ROTATE_RIGHT_TO_LEFT = 0x1;
+    private final int ROTATE_LEFT_TO_RIGHT = 0x2;
+    private final int ROTATE_TOP_TO_BOTTOM = 0x3;
+    private final int ROTATE_BOTTOM_TO_TOP = 0x4;
+    private final int ROTATE_X_AXIS 	   = 0x5;
+    private final int ROTATE_Y_AXIS 	   = 0x6;
+    private final int UNKNOWN_DIRECTION    = 0x7;
     private native void native_request_servo_rotate(int direction);
     private float x0 = 0, y0 = 0;
     private float x1 = 0, y1 = 0;
@@ -63,22 +74,28 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private int servoRotateDirection;
     private final int COUNT_TO_CALC_DIRECTION = 10;
     
-    /* Temperature sensor */
-    private GetTemperature runnable;
+    /** 
+     * Temperature sensor 
+     */
+    private GetTemperature getTemperatureRunnable;
     private Thread getTemperatureThread;
     private boolean getTemperatureIsRunning = true;
     private native void native_get_temperature();
     
-    /* Piezosiren */
-    private final int PIEZO_OFF = 0x1;
-    private final int PIEZO_ON  = 0x2;
-    private int piezoStatus = PIEZO_OFF;
+    /**
+     *  Piezosiren
+     */
+    private final int PIEZO_OFF = 0x8;
+    private final int PIEZO_ON  = 0x9;
+    private int mPiezoStatus = PIEZO_OFF;
     private native void native_control_piezo(int status);
     
-    /* Pumb */
-    private final int PUMP_ON = 0x01;
-    private final int PUMP_OFF = 0x02;
-    private int pumpStatus = PUMP_OFF;
+    /** 
+     * Pumb controller
+     */
+    private final int PUMP_ON  = 0xA;
+    private final int PUMP_OFF = 0xB;
+    private int mPumpStatus = PUMP_OFF;
     private native void native_pump_controller (int status);
     
     @Override
@@ -86,10 +103,16 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     {
         super.onCreate(savedInstanceState);
         
+        /*
+         * Set full screen, no title, alwayls On
+         */
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // Initialize GStreamer and warn if it fails
+        /*
+         *  Initialize GStreamer and warn if it fails
+         */
         try 
         {
             GStreamer.init(this);
@@ -116,15 +139,19 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         checkVideoAvailableThread = new Thread(CheckVideoAvailable);
         checkVideoAvailableThread.start();
         
-        /* Surface init */
+        /*
+         *  Initialize video viewer 
+         */
         SurfaceView sv = (SurfaceView) this.findViewById(R.id.surface_video);
         SurfaceHolder sh = sv.getHolder();
         sh.addCallback(this);
         sv.setOnTouchListener(SurfaceviewOnTouchListener);
         
-        /* get temperature init */
-        runnable = new GetTemperature();
-        getTemperatureThread = new Thread(runnable);
+        /*
+         * Start thread to get temperature
+         */
+        getTemperatureRunnable = new GetTemperature();
+        getTemperatureThread = new Thread(getTemperatureRunnable);
         getTemperatureThread.start();
         
         /* Get phone screen size */
@@ -137,22 +164,35 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         rotateThreadHoldX = (screenWidth)/360;  
         rotateThreadHoldY = (screenHeight)*2/180;
         
-        if (savedInstanceState != null) {
+        /*
+         * Save playing state
+         * onResume() will continue play
+         */
+        if (savedInstanceState != null) 
+        {
             is_playing_desired = savedInstanceState.getBoolean("playing");
             Log.i ("GStreamer", "Activity created. Saved state is playing:" + is_playing_desired);
-        } else {
+        } 
+        else 
+        {
             is_playing_desired = false;
             Log.i ("GStreamer", "Activity created. There is no saved state, playing: false");
         }
 
+        /*
+         * Initialize gstreamer application
+         */
         nativeInit();
     }
 
-    /* Control servo */
-    OnTouchListener SurfaceviewOnTouchListener = new OnTouchListener() {
-		
+    /**
+     * Control servo 
+     */
+    OnTouchListener SurfaceviewOnTouchListener = new OnTouchListener()
+    {
 		@Override
-		public boolean onTouch(View v, MotionEvent event) {
+		public boolean onTouch(View v, MotionEvent event) 
+		{
 			switch (event.getAction()) 
 	    	{
 				case MotionEvent.ACTION_DOWN:
@@ -216,7 +256,8 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 					totalY += dy;
 										
 					/* If distance lager than threadhold -> rotate servo */
-					if ((Math.abs(totalX) > rotateThreadHoldX) && (servoRotateDirection == ROTATE_X_AXIS))
+					if ((Math.abs(totalX) > rotateThreadHoldX) 
+							&& (servoRotateDirection == ROTATE_X_AXIS))
 					{
 						Log.d ("TAG", "totalX = " + totalX);
 						
@@ -258,7 +299,9 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		}
 	};
     
-	/* Get temperature class */
+	/**
+	 *  Get temperature
+	 */
 	private class GetTemperature implements Runnable
 	{
 		private boolean isRunning = false;
@@ -274,7 +317,9 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 			{
 				native_get_temperature();
 				
-				/* Delay 1s */
+				/*
+				 *  Send command to get Temperature every 1s
+				 */
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -289,16 +334,25 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		}
 	}
 	
-	/* Check video available class */
-	Runnable CheckVideoAvailable  = new  Runnable() {
-		
+	/** 
+	 * Check video available 
+	 * Then hide progressbar,
+	 * Enable controlling menu
+	 */
+	Runnable CheckVideoAvailable  = new  Runnable() 
+	{
 		@Override
-		public void run() {
+		public void run() 
+		{
+			long startTime = SystemClock.currentThreadTimeMillis();
 			while(!isVideoAvailable);
-			Log.d("TAG", "OK, Video available!");
+			long stopTime = SystemClock.currentThreadTimeMillis();
+			Log.d("TAG", "OK, Video available!, waiting = " + (stopTime - startTime)/1000 + "s");
 			
-			runOnUiThread(new Runnable() {
-				public void run() {
+			runOnUiThread(new Runnable()
+			{
+				public void run() 
+				{
 					videoWaitingProgressbar.setVisibility(View.GONE);
 					settingButton.setVisibility(View.VISIBLE);
 				}
@@ -307,7 +361,9 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		
 	};
 	
-	/* Display Temperature */
+	/**
+	 *  Display Temperature 
+	 */
 	 private void setMessage(final String message) 
 	 {
 	        final TextView tv = (TextView) this.findViewById(R.id.textview_message);
@@ -322,7 +378,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 
 	 public void SettingOnclickListener(View view)
 	 {
-		 if (settingLayout.getVisibility() == view.GONE)
+		 if (settingLayout.getVisibility() == View.GONE)
 		 {
 			 settingLayout.setVisibility(View.VISIBLE);
 		 }
@@ -332,34 +388,38 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 		 }
 	 }
 	 
-	 /* Control piezosiren */
+	 /**
+	  *  Control piezosiren
+	  */
 	 public void PiezoOnClick (View view)
 	 {
-		 if (piezoStatus == PIEZO_OFF)
+		 if (mPiezoStatus == PIEZO_OFF)
 		 {
 		 	native_control_piezo(PIEZO_ON);
-		 	piezoStatus = PIEZO_ON;
+		 	mPiezoStatus = PIEZO_ON;
 		 }
-		 else if (piezoStatus == PIEZO_ON)
+		 else if (mPiezoStatus == PIEZO_ON)
 		 {
 			 native_control_piezo(PIEZO_OFF);
-			 piezoStatus = PIEZO_OFF;
+			 mPiezoStatus = PIEZO_OFF;
 		 }
 	 }
 	 
-	 /* Pump controller */
+	 /**
+	  *  Pump controller 
+	  */
 	 public void PumpOnclickListener(View view)
 	 {
 
-		 if (pumpStatus == PUMP_OFF)
+		 if (mPumpStatus == PUMP_OFF)
 		 {
 		 	native_pump_controller(PUMP_ON);
-		 	pumpStatus = PUMP_ON;
+		 	mPumpStatus = PUMP_ON;
 		 }
-		 else if (pumpStatus == PUMP_ON)
+		 else if (mPumpStatus == PUMP_ON)
 		 {
 			 native_pump_controller(PUMP_OFF);
-			 pumpStatus = PUMP_OFF;
+			 mPumpStatus = PUMP_OFF;
 		 }
 	 }
 	 
@@ -368,16 +428,18 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 	{
    		super.onStop();
    		
-   		/* Stop get temperature thread */
+   		/* 
+   		 * Stop get temperature thread 
+   		 */
 		 if (getTemperatureThread != null) 
 		 {
-			 runnable.terminateThread();
+			 getTemperatureRunnable.terminateThread();
 		     
 			 try 
 			 {
 				 getTemperatureThread.join();
 			 } 
-			 catch (InterruptedException e) 
+			 catch (Exception e) 
 			 {
 				 e.printStackTrace();
 			 }
@@ -431,25 +493,5 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         System.loadLibrary("Main");
         nativeClassInit();
     }
-
-//    @Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		// Inflate the menu; this adds items to the action bar if it is present.
-//		getMenuInflater().inflate(R.menu.menu, menu);
-//		return true;
-//	}
-    
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle item selection
-//        switch (item.getItemId()) {
-//            case R.id.communicate_rpi:
-//                Intent intent = new Intent(getBaseContext(), Communicate_Rpi.class);
-//                startActivity(intent);
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-//    }
 
 }

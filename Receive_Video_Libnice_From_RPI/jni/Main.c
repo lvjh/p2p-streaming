@@ -3,7 +3,8 @@
 
 static JavaVM *java_vm;
 
-JNIEnv *attach_current_thread (void) {
+JNIEnv *attach_current_thread (void)
+{
   JNIEnv *env;
   JavaVMAttachArgs args;
 
@@ -12,7 +13,8 @@ JNIEnv *attach_current_thread (void) {
   args.name = NULL;
   args.group = NULL;
   __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "java_vm = %d, env = %d, args = %d", java_vm, env, args);
-  if ((*java_vm)->AttachCurrentThread (java_vm, &env, &args) < 0) {
+  if ((*java_vm)->AttachCurrentThread (java_vm, &env, &args) < 0)
+  {
     GST_ERROR ("Failed to attach current thread");
     return NULL;
   }
@@ -20,19 +22,25 @@ JNIEnv *attach_current_thread (void) {
   return env;
 }
 
-/* Unregister this thread from the VM */
-void detach_current_thread (void *env) {
+/*
+ *  Unregister this thread from the VM
+ */
+void detach_current_thread (void *env)
+{
   GST_DEBUG ("Detaching thread %p", g_thread_self ());
   (*java_vm)->DetachCurrentThread (java_vm);
 }
 
 /* Retrieve the JNI environment for this thread */
-JNIEnv *get_jni_env (void) {
+JNIEnv *get_jni_env (void)
+{
   JNIEnv *env;
-  if ((env = pthread_getspecific (current_jni_env)) == NULL) {
+  if ((env = pthread_getspecific (current_jni_env)) == NULL)
+  {
     env = attach_current_thread ();
     pthread_setspecific (current_jni_env, env);
   }
+
   return env;
 }
 
@@ -60,7 +68,7 @@ static JNINativeMethod native_methods[] =
 
 static JNINativeMethod login_methods[] =
 {
-		{ "nativeLogin", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)login_to_server}
+		{ "nativeLogin", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)login_to_server }
 };
 
 /* Library initializer */

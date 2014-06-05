@@ -82,7 +82,7 @@ int connect_with_timeout(char *host, int port, int timeout_sec,
 int login_to_server(JNIEnv *env, jobject thiz, jstring _username, jstring _password)
 {
 	const char *username, *password;
-	char info[200]={0};
+	char info[200] = {0};
 	int ret;
 
 	username = (*env)->GetStringUTFChars( env, _username , NULL ) ;
@@ -91,10 +91,11 @@ int login_to_server(JNIEnv *env, jobject thiz, jstring _username, jstring _passw
 	sprintf(info, "%s$%s", username, password);
 	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
 
-	do {
+	do
+	{
 		ret = connect_with_timeout(SERVER, SERVER_PORT, 5, 0, info);
-		//sleep(5);
-	}while(ret == -1);// Can't connect to server
+	}
+	while(ret == -1);// Can't connect to server
 
 	if (ret == -2)//login failed
 		return 1;
