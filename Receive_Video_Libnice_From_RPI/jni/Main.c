@@ -68,12 +68,13 @@ static JNINativeMethod native_methods[] =
 
 static JNINativeMethod login_methods[] =
 {
-		{ "nativeLogin", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)login_to_server },
-		{ "nativeListOnlineClient", "(Ljava/lang/String;)Ljava/lang/String;", (void *)list_online_client}
+		{ "nativeLogin", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)login_to_server }
+
 };
 
 static JNINativeMethod client_state_methods[] =
 {
+		{ "nativeListOnlineClient", "(Ljava/lang/String;)Ljava/lang/String;", (void *)list_online_client},
 		{ "nativeCloseSocket", "()V", (void *) close_server_socket }
 };
 

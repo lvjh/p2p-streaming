@@ -19,7 +19,9 @@
         </activity>
         
          <activity 
-             android:name="com.gst_sdk_tutorials.tutorial_3.ClientState" >
+             android:name="com.gst_sdk_tutorials.tutorial_3.ClientState" 
+             android:theme="@style/MyTheme"
+             android:screenOrientation="portrait">
         </activity>
         
          <activity 

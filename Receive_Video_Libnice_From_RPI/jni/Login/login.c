@@ -92,20 +92,18 @@ int login_to_server(JNIEnv *env, jobject thiz, jstring _username, jstring _passw
 	sprintf(info, "%s$%s", username, password);
 	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
 
-	do
-	{
-		ret = connect_with_timeout(SERVER, SERVER_PORT, 5, 0, info);
-	}
-	while(ret == -1);// Can't connect to server
+	ret = connect_with_timeout(SERVER, SERVER_PORT, 5, 0, info);
 
-	if (ret == -2)//login failed
-		return 1;
-	else
+	switch (ret)
 	{
-		global_socket = ret;
-		return 0;// login success
+		case -2:
+			return 0; // wrong username/password
+		case -1:
+			return 1; // server down
+		default:
+			global_socket = ret;
+			return 2;
 	}
-
 }
 
 /**

@@ -2,6 +2,7 @@ package com.gst_sdk_tutorials.tutorial_3;
 
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -43,6 +44,22 @@ public class ClientStateAdapter extends BaseAdapter{
 		return position;
 	}
 
+	/**
+	 * Set adapter's data
+	 */
+	public void setData(Activity activity, ArrayList<ClientInfo> arrayList) {
+		this.mClientArralist = arrayList;
+		
+		activity.runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				notifyDataSetChanged();
+			}
+		});
+		
+	}
+	
 	class ViewHolder
 	{
 		ImageView mStateIcon;
