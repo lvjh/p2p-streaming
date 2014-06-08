@@ -119,12 +119,12 @@ jstring list_online_client(JNIEnv *env, jobject thiz, jstring _username)
 	const char *username = (*env)->GetStringUTFChars( env, _username , NULL);
 
 	sprintf(info, "003$%s$%s", username, username);
-	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
+	//__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
 	Base64Encode(info, sender, BUFFFERLEN);
 	send(global_socket, sender, 181, NULL);
 	recv(global_socket, receiveBuffer, 524, NULL);
 	Base64Decode(receiveBuffer, info, BUFFFERLEN);
-	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
+	//__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
 	tmp = strtok(info, "$");
 	tmp = strtok(NULL, "$");
 	tmp = strtok(NULL, "$");

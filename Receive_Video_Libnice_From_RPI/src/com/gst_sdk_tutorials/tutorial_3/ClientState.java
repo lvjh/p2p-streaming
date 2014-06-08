@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * Using listview to show clients's state 
@@ -77,10 +78,10 @@ public class ClientState extends Activity {
 	}
 	
 	@Override
-	protected void onStop() {
-		super.onStop();
+	protected void onPause() {
+		super.onPause();
 		
-		Log.i("", "Stop list client thread");
+		Log.i("", "Pause list client thread");
 		
 		/*
 		 * Stop list client state thread
@@ -115,7 +116,7 @@ public class ClientState extends Activity {
 		public ListClientState(Activity activity) {
 			this.mActivity = activity;
 		}
-
+		
 		@Override
 		public void run() {
 			
@@ -126,6 +127,9 @@ public class ClientState extends Activity {
 				 */
 				String result = nativeListOnlineClient(mUserName);
 				
+				/* 
+				 * Server Down 
+				 * */
 				if (result == null)
 					continue;
 				
@@ -160,7 +164,7 @@ public class ClientState extends Activity {
 				}
 
 				/*
-				 * Wait 5s
+				 * Wait 1s
 				 */
 				try {
 					Thread.sleep(1000);

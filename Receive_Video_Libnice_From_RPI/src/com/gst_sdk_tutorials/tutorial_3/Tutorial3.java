@@ -1,11 +1,13 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -503,5 +505,19 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         System.loadLibrary("Main");
         nativeClassInit();
     }
-
+    
+    /**
+     * Disable backpress until 
+     * connection is OK
+     */
+    
+    @Override
+    public void onBackPressed() {
+    	
+    	if (!isVideoAvailable) {
+    		return;
+    	}
+    	
+    	super.onBackPressed();
+    }
 }

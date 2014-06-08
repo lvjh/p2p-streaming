@@ -20,11 +20,11 @@ public class ClientStateAdapter extends BaseAdapter{
 	
 	private String mUserName;
 	
-	private Context mContext;
+	private Activity mActivity;
 	
-	public ClientStateAdapter(Context contex, ArrayList<ClientInfo> clientArraylist,
+	public ClientStateAdapter(Activity activity, ArrayList<ClientInfo> clientArraylist,
 			String userName) {
-		this.mContext = contex;
+		this.mActivity = activity;
 		this.mClientArralist = clientArraylist;
 		this.mUserName = userName;
 	}
@@ -82,10 +82,10 @@ public class ClientStateAdapter extends BaseAdapter{
 					/*
 					 * Start Tutorial3 activity
 					 */
-					Intent intent = new Intent(mContext, Tutorial3.class);
+					Intent intent = new Intent(mActivity, Tutorial3.class);
 					intent.putExtra("rpi_name", mClientName.getText().toString());
 					intent.putExtra("user_name", mUserName);
-					mContext.startActivity(intent);
+					mActivity.startActivity(intent);
 				}
 			});
 		}
@@ -98,7 +98,7 @@ public class ClientStateAdapter extends BaseAdapter{
 		
 		if (convertView == null) 
         {  
-             LayoutInflater li = (LayoutInflater) mContext  
+             LayoutInflater li = (LayoutInflater) mActivity  
                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);  
              convertView = li.inflate(R.layout.listview_item, null);  
 
@@ -128,6 +128,8 @@ public class ClientStateAdapter extends BaseAdapter{
 		 */
 		if (mClientArralist.get(position).getmClientState() == ClientInfo.OFFLINE)
 			holder.mConnectTo.setEnabled(false);
+		else
+			holder.mConnectTo.setEnabled(true);
 		
 		return convertView;
 	}

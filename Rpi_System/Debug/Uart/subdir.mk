@@ -5,16 +5,19 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Uart/command.c \
+../Uart/receive.c \
 ../Uart/uart.c \
 ../Uart/uart_controller.c 
 
 OBJS += \
 ./Uart/command.o \
+./Uart/receive.o \
 ./Uart/uart.o \
 ./Uart/uart_controller.o 
 
 C_DEPS += \
 ./Uart/command.d \
+./Uart/receive.d \
 ./Uart/uart.d \
 ./Uart/uart_controller.d 
 

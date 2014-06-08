@@ -171,8 +171,8 @@ void check_initialization_complete (CustomData *data) {
  void gst_native_finalize (JNIEnv* env, jobject thiz) {
   GST_CUSTOM_DATA *app_data;
 
-  /* close socket */
-  shutdown(global_socket, 2);
+//  /* close socket */
+//  shutdown(global_socket, 2);
 
   app_data->video_receive_data = GET_CUSTOM_DATA (env, thiz, video_receive_custom_data_field_id);
 
