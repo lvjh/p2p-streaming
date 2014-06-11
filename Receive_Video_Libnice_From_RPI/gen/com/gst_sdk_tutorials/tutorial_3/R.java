@@ -25,13 +25,14 @@ public final class R {
         public static final int edittext=0x7f020008;
         public static final int greenprogress=0x7f020009;
         public static final int gst_sdk_icon=0x7f02000a;
-        public static final int ic_action_overflow=0x7f02000b;
-        public static final int ic_action_overflow_clicked=0x7f02000c;
-        public static final int ic_action_refresh=0x7f02000d;
-        public static final int offline=0x7f02000e;
-        public static final int online=0x7f02000f;
-        public static final int setting=0x7f020010;
-        public static final int settingbackground=0x7f020011;
+        public static final int horse_logo=0x7f02000b;
+        public static final int ic_action_overflow=0x7f02000c;
+        public static final int ic_action_overflow_clicked=0x7f02000d;
+        public static final int ic_action_refresh=0x7f02000e;
+        public static final int offline=0x7f02000f;
+        public static final int online=0x7f020010;
+        public static final int setting=0x7f020011;
+        public static final int settingbackground=0x7f020012;
     }
     public static final class id {
         public static final int action_refresh=0x7f080015;
@@ -72,6 +73,7 @@ public final class R {
     }
     public static final class string {
         public static final int Refresh=0x7f050003;
+        public static final int Register=0x7f050004;
         public static final int app_name=0x7f050000;
         public static final int button_play=0x7f050001;
         public static final int button_stop=0x7f050002;
