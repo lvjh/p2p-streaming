@@ -127,12 +127,14 @@ int wait_android_request()
 	printf ("==========	WAITTNG ANDROID REQUEST	========== \n");
 	printf ("Waiting android request ...\n");
 
-	/* wait until receive android's request */
+	/*
+	 *  wait until receive android's request
+	 * */
 	if(recv(global_socket, buffer, 181, NULL))
 	{
-		printf("%s\n",buffer);
+		printf("buffer  = %s\n",buffer);
 		rc = Base64Decode(buffer, receiver, BUFFFERLEN);
-		printf("%s\n",receiver);
+		printf("receiver = %s\n",receiver);
 		header = strtok (receiver,"$");
 		origin = strtok (NULL,"$");
 		dest = strtok (NULL,"$");
@@ -148,5 +150,14 @@ int wait_android_request()
 		else
 			return 0;
 	}
+	/*
+	 * Server down
+	 */
+	else
+	{
+		printf ("Server Down!");
+		return 2;
+	}
+
 
 }

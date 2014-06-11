@@ -1,13 +1,10 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -16,7 +13,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
-import android.view.WindowId;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -25,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gstreamer.GStreamer;
+
+
 
 public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     
@@ -38,6 +36,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private static native boolean nativeClassInit(); // Initialize native class: cache Method IDs for callbacks
     private native void nativeSurfaceInit(Object surface);
     private native void nativeSurfaceFinalize();
+    private native void nativeExitStreaming();
     
     private long native_custom_data; // Native code will use this to keep private data
     private long video_receive_native_custom_data;
@@ -106,6 +105,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     {
         super.onCreate(savedInstanceState);
         
+        Log.i("TAG", "Tutorial 3");
         /*
          * Set full screen, no title, alwayls On
          */
@@ -515,9 +515,30 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     public void onBackPressed() {
     	
     	if (!isVideoAvailable) {
+    		/*
+    		 * Do not allow finish
+    		 */
     		return;
-    	}
-    	
+    	} else {
+    		/*
+    		 * Send signal disconnect to RPI
+    		 */
+			int count = 3;
+			
+			do {
+				Log.e("", "Exit Streaming");
+				
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+				}
+				
+				nativeExitStreaming();
+				count --;
+				
+			} while (count > 0);
+		}
+    		
     	super.onBackPressed();
     }
 }

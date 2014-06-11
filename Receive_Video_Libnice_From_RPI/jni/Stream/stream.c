@@ -305,3 +305,21 @@ void close_server_socket (JNIEnv *env, jobject thiz)
 	shutdown(global_socket, 2);
 }
 
+void exit_streaming (JNIEnv *env, jobject thiz)
+{
+	char sender[181] = {0};
+	char info[181] = {0};
+	char receiveBuffer[181] = {0};
+	char *tmp;
+
+	/*
+	 * Establish signal
+	 */
+	sprintf(info, "005$%s$%s", client_name, rpi_name);
+
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
+	Base64Encode(info, sender, BUFFFERLEN);
+	send(global_socket, sender, 181, NULL);
+
+}
+

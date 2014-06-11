@@ -103,9 +103,11 @@ void  _video_send_init_gstreamer(NiceAgent *magent, guint stream_id)
 	nicesink = gst_element_factory_make ("nicesink", NULL);
 
 	//rpicamsrc
-	g_object_set (rpicamsrc, "bitrate", 300000, NULL);
+	g_object_set (rpicamsrc, "bitrate", 5000000, NULL);
 	g_object_set (rpicamsrc, "rotation", 180, NULL);
-	g_object_set (capsfilter, "caps", gst_caps_from_string("video/x-h264,width=800,height=600,framerate=25/1"), NULL);
+	g_object_set (rpicamsrc, "exposure-mode", 9, NULL);
+	g_object_set (rpicamsrc, "video-stabilisation", TRUE, NULL);
+	g_object_set (capsfilter, "caps", gst_caps_from_string("video/x-h264,width=1280,height=720,framerate=25/1"), NULL);
 	//rtph264pay
 	g_object_set (rtph264pay, "pt", 96, NULL);
 	g_object_set (rtph264pay, "config-interval", 1, NULL);

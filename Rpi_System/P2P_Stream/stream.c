@@ -5,7 +5,7 @@ void* _check_connection()
 	printf("[check_connection]\n");
 	char buffer[181] = {0};
 	char receiver[181] = {0};
-	char *tmp, *tmp2;
+	char *tmp, *tmp1, *tmp2;
 	int rc = 0;
 
 	//while (text_gathering_done == FALSE) usleep(100);
@@ -23,14 +23,14 @@ void* _check_connection()
 	{
 		rc = Base64Decode(buffer, receiver, BUFFFERLEN);
 		printf("Android's username exit[Full message] = %s\n", receiver);
-		tmp = strtok (receiver,"$");
-		tmp = strtok (NULL,"$");
-		tmp = strtok (NULL,"$");
-		tmp = strtok (NULL,"$");
-		tmp2 = strtok (tmp," ");
-		printf("Android's username exit = %s\n", tmp2);
+		tmp1 = strtok (receiver,"$");
+		tmp2 = strtok (NULL,"$");
+		//tmp = strtok (NULL,"$");
+		//tmp2 = strtok (tmp," ");
+		printf ("%s\n", tmp1);
+		printf ("%s", tmp2);
 
-		if (!strcmp(tmp2,originBuf))
+		if (!strcmp(tmp2,originBuf) && !strcmp(tmp1, "005"))
 		{
 			printf("Android exit\n");
 			g_main_loop_quit (gloop);

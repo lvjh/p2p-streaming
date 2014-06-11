@@ -57,7 +57,8 @@ static JNINativeMethod native_methods[] =
   { "native_request_servo_rotate", "(I)V", (void *) rotate_servo},
   { "native_get_temperature", "()V", (void *) getTemperature},
   { "native_control_piezo", "(I)V", (void *) controlPiezosiren},
-  { "native_pump_controller", "(I)V", (void *) pumpController}
+  { "native_pump_controller", "(I)V", (void *) pumpController},
+  { "nativeExitStreaming", "()V", (void *) exit_streaming}
 };
 
 ///* List of implemented native methods */

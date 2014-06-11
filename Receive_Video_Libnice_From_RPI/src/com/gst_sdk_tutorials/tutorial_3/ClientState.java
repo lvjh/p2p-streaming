@@ -10,7 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
-import android.widget.Toast;
+
+
 
 /**
  * Using listview to show clients's state 
@@ -92,6 +93,7 @@ public class ClientState extends Activity {
 			try {
 				mListClientStateThread.join();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

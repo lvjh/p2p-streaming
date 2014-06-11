@@ -124,7 +124,7 @@ jstring list_online_client(JNIEnv *env, jobject thiz, jstring _username)
 	send(global_socket, sender, 181, NULL);
 	recv(global_socket, receiveBuffer, 524, NULL);
 	Base64Decode(receiveBuffer, info, BUFFFERLEN);
-	//__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
+	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "info = %s", info);
 	tmp = strtok(info, "$");
 	tmp = strtok(NULL, "$");
 	tmp = strtok(NULL, "$");

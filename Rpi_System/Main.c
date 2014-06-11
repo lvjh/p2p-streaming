@@ -16,10 +16,13 @@ int main()
 			ret = wait_android_request();
 
 			/* Server down -> connect again */
-			if (!ret)
+			if (ret == 2)
+			{
+				shutdown(global_socket, 2);
 				connect_to_server();
+			}
 
-		}while(!ret);
+		}while(ret != 1);
 
 		printf("Accept android's request!\n");
 		printf("Start streaming!\n");
