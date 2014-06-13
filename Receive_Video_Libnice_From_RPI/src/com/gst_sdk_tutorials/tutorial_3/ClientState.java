@@ -1,6 +1,7 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
@@ -9,9 +10,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.widget.ListView;
+import android.widget.ExpandableListView;
 
-
+import com.gst_sdk_tutorials.tutorial_3.R;
 
 /**
  * Using listview to show clients's state 
@@ -19,27 +20,24 @@ import android.widget.ListView;
 
 public class ClientState extends Activity {
 
-	private ListView mListview;
-	
-	private ArrayList<ClientInfo> mClientArray = new ArrayList<ClientInfo>();
+	private ExpandableListView mListView;
 	
 	private native String nativeListOnlineClient (String username);
 	
 	private String mUserName = null;
 	
-	private ClientStateAdapter mClientStateAdapter = null;
-	
 	private ListClientState mListClientStateThread = null;
 	
 	private native void nativeCloseSocket();
 	
+	private ArrayList<Client> mParent = new ArrayList<Client>();
+
+	private ClientAdapter mAdapter;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.clients_state_layout);
-		
-		Log.i("", "onCreate()");
+		setContentView(R.layout.state_main_layout);
 		
 		/*
 		 * Get data from Login activity 
@@ -47,12 +45,9 @@ public class ClientState extends Activity {
 		Intent intent = getIntent();
 		mUserName = intent.getStringExtra("username");
 		
-		/*
-		 * Initialize listview
-		 */
-		mClientStateAdapter = new ClientStateAdapter(this, mClientArray, mUserName);
-		mListview = (ListView) findViewById(R.id.client_state_listview_id);
-		mListview.setAdapter(mClientStateAdapter);
+		mListView = (ExpandableListView) findViewById(R.id.lvExp);
+		mAdapter = new ClientAdapter(this, mParent, mUserName);
+		mListView.setAdapter(mAdapter);
 	}
 
 	/**
@@ -101,7 +96,6 @@ public class ClientState extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		
 		Log.i("", "Close socket!");
 		nativeCloseSocket();
 	}
@@ -143,31 +137,24 @@ public class ClientState extends Activity {
 				/*
 				 * Cleare old data
 				 */
-				if (mClientArray.size() > 0)
-					mClientArray.clear();
+				if (mParent.size() > 0)
+					mParent.clear();
 				
-				/*
-				 * Get client is rpi
-				 */
 				for (int i = 0; i < clients.length; i++){
 					if (clients[i].toLowerCase(Locale.getDefault()).contains("rpi")) {
 						String[] parts = clients[i].split(" ");
 						
 						if (clients[i].toLowerCase(Locale.getDefault()).contains("online"))
-							mClientArray.add(new ClientInfo(parts[0], ClientInfo.ONLINE));
+							mParent.add(new Client(parts[0], Client.ONLINE));
 						else
-							mClientArray.add(new ClientInfo(parts[0], ClientInfo.OFFLINE));
+							mParent.add(new Client(parts[0], Client.OFFLINE));
 					}
 				}
 				
-				if (mClientStateAdapter != null) {
-					Log.i("","Set adapter data");
-					mClientStateAdapter.setData(mActivity, mClientArray);
+				if (mAdapter != null) {
+					mAdapter.setData(mParent);
 				}
 
-				/*
-				 * Wait 1s
-				 */
 				try {
 					Thread.sleep(1000);
 				} catch (Exception e) {
