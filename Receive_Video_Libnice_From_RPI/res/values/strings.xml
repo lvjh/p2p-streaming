@@ -5,4 +5,8 @@
     <string name="button_stop">Stop</string>
     <string name="Refresh">Refresh</string>
     <string name="Register"><u>Register for new user</u></string>
+    <string name="Temperature">Temperature:</string>
+    <string name="Location">Location:</string>
+    <string name="OnlineFrom">Online From :</string>
+    
 </resources>

@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
+
 public class ClientAdapter extends BaseExpandableListAdapter {
 	private ArrayList<Client> mParent;
 	private Context mContext;
@@ -70,7 +72,7 @@ public class ClientAdapter extends BaseExpandableListAdapter {
 		holder.tv1.setText(child.getmTemperature() + "");
 		holder.tv2.setText(child.getmLocation() + "");
 		holder.tv3.setText(child.getmTimeOnline() + "");
-
+		
 		return convertView;
 	}
 
@@ -177,8 +179,10 @@ public class ClientAdapter extends BaseExpandableListAdapter {
 
 	public void setData(ArrayList<Client> mParent2) {
 		mParent = mParent2;
-		mParent.get(0).getmClientDetailInfo().add(new ClientDetailInfo(10, 20, 30));
-		mParent.get(1).getmClientDetailInfo().add(new ClientDetailInfo(100, 110, 120));
+		
+		for (Client client : mParent) {
+			client.getmClientDetailInfo().add(new ClientDetailInfo(10, 20, 30));
+		}
 		
 		((Activity) mContext).runOnUiThread(new Runnable() {
 			

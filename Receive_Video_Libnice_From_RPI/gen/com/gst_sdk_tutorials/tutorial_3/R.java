@@ -36,11 +36,11 @@ public final class R {
         public static final int settingbackground=0x7f020013;
     }
     public static final class id {
-        public static final int action_refresh=0x7f08001b;
+        public static final int action_refresh=0x7f08001c;
         public static final int buttonLogin=0x7f08000b;
         public static final int button_connect_to=0x7f080006;
         public static final int client_state_listview_id=0x7f080000;
-        public static final int communicate_rpi=0x7f08001c;
+        public static final int communicate_rpi=0x7f08001d;
         public static final int editPassword=0x7f08000a;
         public static final int editToRpi=0x7f080002;
         public static final int editUserName=0x7f080009;
@@ -48,8 +48,9 @@ public final class R {
         public static final int imgView_client_status=0x7f080005;
         public static final int imv_back=0x7f080012;
         public static final int lblListHeader=0x7f080016;
+        public static final int ln01=0x7f080017;
         public static final int login_layout=0x7f080008;
-        public static final int lvExp=0x7f08001a;
+        public static final int lvExp=0x7f08001b;
         public static final int piezoBtn=0x7f080010;
         public static final int progressBar1=0x7f080011;
         public static final int send_message=0x7f080003;
@@ -60,9 +61,9 @@ public final class R {
         public static final int textView1=0x7f080001;
         public static final int textView2=0x7f080004;
         public static final int textview_message=0x7f08000f;
-        public static final int tv01=0x7f080017;
-        public static final int tv02=0x7f080018;
-        public static final int tv03=0x7f080019;
+        public static final int tv01=0x7f080018;
+        public static final int tv02=0x7f080019;
+        public static final int tv03=0x7f08001a;
         public static final int tv_client_name=0x7f080007;
         public static final int usernameTextView=0x7f080015;
     }
@@ -82,8 +83,11 @@ public final class R {
         public static final int menu=0x7f070001;
     }
     public static final class string {
+        public static final int Location=0x7f050006;
+        public static final int OnlineFrom=0x7f050007;
         public static final int Refresh=0x7f050003;
         public static final int Register=0x7f050004;
+        public static final int Temperature=0x7f050005;
         public static final int app_name=0x7f050000;
         public static final int button_play=0x7f050001;
         public static final int button_stop=0x7f050002;

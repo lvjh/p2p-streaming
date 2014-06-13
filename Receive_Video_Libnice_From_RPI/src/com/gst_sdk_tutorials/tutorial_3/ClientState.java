@@ -160,10 +160,13 @@ public class ClientState extends Activity {
 					if (clients[i].toLowerCase(Locale.getDefault()).contains("rpi")) {
 						String[] parts = clients[i].split(" ");
 						
-						if (clients[i].toLowerCase(Locale.getDefault()).contains("online"))
+						if (clients[i].toLowerCase(Locale.getDefault()).contains("online")) {
 							mParent.add(new Client(parts[0], Client.ONLINE));
-						else
+							mParent.add(new Client(parts[0], Client.ONLINE));
+						} else {
 							mParent.add(new Client(parts[0], Client.OFFLINE));
+							mParent.add(new Client(parts[0], Client.OFFLINE));
+						}
 					}
 				}
 				

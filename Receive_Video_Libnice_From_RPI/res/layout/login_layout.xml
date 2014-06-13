@@ -44,6 +44,7 @@
 		         	android:layout_width="match_parent"
 		         	android:layout_height="wrap_content"
 		          	android:textColor="#3D5266"
+		          	android:textColorHighlight="#ff0000"
 		         	android:text="USERNAME"/>
    
 			   <EditText
@@ -80,7 +81,8 @@
 			       android:onClick="login"
 			       android:text="LOGIN"
 			       android:layout_marginTop="20dp"
-			       android:layout_gravity="center_horizontal" />
+			       android:layout_gravity="center_horizontal"
+			       android:textColor="#ffffffff" />
 			
             </LinearLayout>
                  
