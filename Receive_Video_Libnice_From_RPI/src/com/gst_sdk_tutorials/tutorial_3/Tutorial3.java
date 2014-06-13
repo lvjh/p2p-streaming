@@ -11,10 +11,12 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -100,6 +102,11 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     private int mPumpStatus = PUMP_OFF;
     private native void native_pump_controller (int status);
     
+    /**
+     * Back button
+     */
+    private ImageView mImvBack;
+    
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -151,6 +158,11 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         checkVideoAvailableThread = new Thread(CheckVideoAvailable);
         checkVideoAvailableThread.start();
         
+        /* Back button*/
+        mImvBack = (ImageView) findViewById(R.id.imv_back);
+        mImvBack.setVisibility(View.GONE);
+        mImvBack.setOnClickListener(onExitStreaming);
+        
         /*
          *  Initialize video viewer 
          */
@@ -197,6 +209,32 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
         nativeInit(userName, rpiName);
     }
 
+    OnClickListener onExitStreaming = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			/*
+    		 * Send signal disconnect to RPI
+    		 */
+			int count = 3;
+			
+			do {
+				Log.e("", "Exit Streaming");
+				
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+				}
+				
+				nativeExitStreaming();
+				count --;
+				
+			} while (count > 0);
+			
+			finish();
+		}
+	};
+	
     /**
      * Control servo 
      */
@@ -367,6 +405,7 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
 				{
 					videoWaitingProgressbar.setVisibility(View.GONE);
 					settingButton.setVisibility(View.VISIBLE);
+					mImvBack.setVisibility(View.VISIBLE);
 				}
 			});
 		}
@@ -513,32 +552,8 @@ public class Tutorial3 extends Activity implements SurfaceHolder.Callback {
     
     @Override
     public void onBackPressed() {
-    	
-    	if (!isVideoAvailable) {
-    		/*
-    		 * Do not allow finish
-    		 */
-    		return;
-    	} else {
-    		/*
-    		 * Send signal disconnect to RPI
-    		 */
-			int count = 3;
-			
-			do {
-				Log.e("", "Exit Streaming");
-				
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-				}
-				
-				nativeExitStreaming();
-				count --;
-				
-			} while (count > 0);
-		}
-    		
-    	super.onBackPressed();
+    	/**
+    	 * Disable this function
+    	 */
     }
 }

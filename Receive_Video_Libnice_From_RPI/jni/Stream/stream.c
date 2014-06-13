@@ -171,6 +171,12 @@ void check_initialization_complete (CustomData *data) {
  void gst_native_finalize (JNIEnv* env, jobject thiz) {
   GST_CUSTOM_DATA *app_data;
 
+  /* Gathering flag for each thread */
+  	video_receive_gathering_done = FALSE;
+  	send_audio_gathering_done = FALSE;
+  	receive_audio_gathering_done = FALSE;
+  	controller_gathering_done = FALSE;
+
 //  /* close socket */
 //  shutdown(global_socket, 2);
 
@@ -229,8 +235,8 @@ void check_initialization_complete (CustomData *data) {
 	set_message_method_id = (*env)->GetMethodID (env, klass, "setMessage", "(Ljava/lang/String;)V");
 	__android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "set_message_method_id = %d", set_message_method_id);
 	on_gstreamer_initialized_method_id = (*env)->GetMethodID (env, klass, "onGStreamerInitialized", "()V");
-	jclass cls = (*env)->FindClass(env, "com/gst_sdk_tutorials/tutorial_3/Communicate_Rpi");
-	set_message_from_rpi = (*env)->GetMethodID (env, cls, "receive_message_from_rpi", "(Ljava/lang/String;)V");
+	//jclass cls = (*env)->FindClass(env, "com/gst_sdk_tutorials/tutorial_3/Communicate_Rpi");
+	//set_message_from_rpi = (*env)->GetMethodID (env, cls, "receive_message_from_rpi", "(Ljava/lang/String;)V");
 
 	if (!send_audio_custom_data_field_id || !video_receive_custom_data_field_id  ||
 			!set_message_method_id || !on_gstreamer_initialized_method_id)
@@ -303,6 +309,8 @@ void close_server_socket (JNIEnv *env, jobject thiz)
 {
 	/* close socket */
 	shutdown(global_socket, 2);
+	global_socket = 0;
+	//__android_log_print (ANDROID_LOG_ERROR, "tutorial-3","global_socket = %d", global_socket);
 }
 
 void exit_streaming (JNIEnv *env, jobject thiz)

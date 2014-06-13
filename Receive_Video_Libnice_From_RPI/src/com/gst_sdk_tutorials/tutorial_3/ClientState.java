@@ -34,6 +34,8 @@ public class ClientState extends Activity {
 
 	private ClientAdapter mAdapter;
 	
+	private int mDelayTime = 10;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,8 +79,6 @@ public class ClientState extends Activity {
 	protected void onPause() {
 		super.onPause();
 		
-		Log.i("", "Pause list client thread");
-		
 		/*
 		 * Stop list client state thread
 		 */
@@ -100,6 +100,18 @@ public class ClientState extends Activity {
 		nativeCloseSocket();
 	}
 	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.i("", "Terminate thread");
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		this.mDelayTime = 5000;
+		Log.i("", "ClientStat, eonActivityResult");
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 	/**
 	 * Thread to list clients's state
 	 */
@@ -115,14 +127,18 @@ public class ClientState extends Activity {
 		
 		@Override
 		public void run() {
-			
+			try {
+				Thread.sleep(mDelayTime);
+			} catch (Exception e) {
+			}
 			while(mIsRunning) {
 				
 				/*
 				 * Request server to list all clients's state
 				 */
+				Log.i("", "Inside Thread 1");
 				String result = nativeListOnlineClient(mUserName);
-				
+				Log.i("", "Inside Thread 2");
 				/* 
 				 * Server Down 
 				 * */
@@ -140,7 +156,7 @@ public class ClientState extends Activity {
 				if (mParent.size() > 0)
 					mParent.clear();
 				
-				for (int i = 0; i < clients.length; i++){
+				for (int i = 0; i < clients.length; i++) {
 					if (clients[i].toLowerCase(Locale.getDefault()).contains("rpi")) {
 						String[] parts = clients[i].split(" ");
 						

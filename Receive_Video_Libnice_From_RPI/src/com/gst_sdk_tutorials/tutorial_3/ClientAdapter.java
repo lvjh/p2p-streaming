@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,7 +56,6 @@ public class ClientAdapter extends BaseExpandableListAdapter {
 		
 		ChildHolder holder;
 		ClientDetailInfo child = mParent.get(groupPosition).getmClientDetailInfo().get(childPosition);
-		
 		
 		if (convertView == null) {
 			 LayoutInflater li = (LayoutInflater) mContext 
@@ -119,7 +119,9 @@ public class ClientAdapter extends BaseExpandableListAdapter {
 					Intent intent = new Intent(mContext, Tutorial3.class);
 					intent.putExtra("rpi_name", mClientName.getText().toString());
 					intent.putExtra("user_name", mUserName);
-					mContext.startActivity(intent);
+					((Activity)mContext).startActivityForResult(intent, 0);
+					Log.i("", "User name = " + mUserName);
+					Log.i("", "Rpi name = " + mClientName.getText().toString());
 				}
 			});
 		}

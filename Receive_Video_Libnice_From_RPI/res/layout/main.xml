@@ -89,6 +89,14 @@
   	  	      android:layout_centerVertical="true"
   	  	      style="?android:attr/progressBarStyleLarge"/>
 
+  	  	  <ImageView
+  	  	      android:id="@+id/imv_back"
+  	  	      android:layout_width="60dp"
+  	  	      android:layout_height="60dp"
+  	  	      android:layout_alignParentBottom="true"
+  	  	      android:layout_alignParentLeft="true"
+  	  	      android:src="@drawable/back_icon" />
+
 	</RelativeLayout>
    	  
 </FrameLayout>
