@@ -1,9 +1,9 @@
 #include "stream.h"
 #include "../Login/login.h"
+#include "gstreamer_utils.h"
 
 void*  _send_audio_main(CustomData *data)
 {
-
 	data->agent = libnice_create_NiceAgent_with_gstreamer ( send_audio_gathering_done,
 															data->context);
 	// Create a new stream with one component
@@ -24,25 +24,6 @@ void*  _send_audio_main(CustomData *data)
 	libnice_start_gather_candidate (data->agent,
 									data->stream_id,
 									data->context);
-}
-
-static void
-on_error (GstBus     *bus,
-          GstMessage *message,
-          gpointer    user_data)
-{
-	  GError *err;
-	  gchar *debug_info;
-	  gchar *message_string;
-
-	  gst_message_parse_error (message, &err, &debug_info);
-	  message_string = g_strdup_printf ("Error received from element %s: %s", GST_OBJECT_NAME (message->src), err->message);
-
-	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "=========================================\n");
-	  __android_log_print (ANDROID_LOG_INFO, "tutorial-3", "debug_info = %s \n\n message_string = %s\n", debug_info, message_string);
-	  g_clear_error (&err);
-	  g_free (debug_info);
-	  g_free (message_string);
 }
 
 void  _send_audio_init_gstreamer(NiceAgent *magent, guint stream_id, CustomData *data)
@@ -71,7 +52,8 @@ void  _send_audio_init_gstreamer(NiceAgent *magent, guint stream_id, CustomData 
 	rtpL16pay = gst_element_factory_make ("rtpL16pay", NULL);
 	nicesink = gst_element_factory_make ("nicesink", NULL);
 
-	g_object_set (caps, "caps", gst_caps_from_string("audio/x-raw-int, channels=1, rate=16000, payload=96"), NULL);
+	g_object_set (caps, "caps", gst_caps_from_string("audio/x-raw-int,"
+			" channels=1, rate=16000, payload=96"), NULL);
 	//Set properties
 	g_object_set (nicesink, "agent", magent, NULL);
 	g_object_set (nicesink, "stream", stream_id, NULL);
@@ -79,14 +61,19 @@ void  _send_audio_init_gstreamer(NiceAgent *magent, guint stream_id, CustomData 
 
 
 	pipeline = gst_pipeline_new ("Audio pipeline");
-	if (!pipeline || !openslessrc || !audioconvert || !caps || !rtpL16pay || !nicesink)
+	if (!pipeline || !openslessrc || !audioconvert
+			|| !caps || !rtpL16pay || !nicesink)
 	{
 		g_printerr ("Not all elements could be created.\n");
 		return;
 	}
 
-	gst_bin_add_many (GST_BIN (pipeline), openslessrc, audioconvert, caps, rtpL16pay, nicesink, NULL);
-	if (gst_element_link_many (openslessrc, audioconvert, caps, rtpL16pay, nicesink, NULL) != TRUE)
+	gst_bin_add_many (GST_BIN (pipeline), openslessrc,
+					  audioconvert, caps, rtpL16pay,
+					  nicesink, NULL);
+
+	if (gst_element_link_many (openslessrc, audioconvert, caps,
+							   rtpL16pay, nicesink, NULL) != TRUE)
 	{
 		g_printerr ("Elements could not be linked.\n");
 		gst_object_unref (pipeline);
