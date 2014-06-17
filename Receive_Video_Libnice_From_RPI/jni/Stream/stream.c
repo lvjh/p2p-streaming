@@ -88,15 +88,24 @@ void check_initialization_complete (CustomData *data) {
 	//connect_to_rpi();
 
 	/* Gathering flag for each thread */
-	video_receive_gathering_done = FALSE;
-	send_audio_gathering_done = FALSE;
-	receive_audio_gathering_done = FALSE;
-	controller_gathering_done = FALSE;
+	video_receive_gathering_done = (gboolean *)malloc(sizeof(gboolean));
+	(*video_receive_gathering_done) = FALSE;
+
+	send_audio_gathering_done = (gboolean *)malloc(sizeof(gboolean));
+	*send_audio_gathering_done = FALSE;
+
+	receive_audio_gathering_done = (gboolean *)malloc(sizeof(gboolean));
+	(*receive_audio_gathering_done) = FALSE;
+
+	controller_gathering_done = (gboolean *)malloc(sizeof(gboolean));
+	(*controller_gathering_done) = FALSE;
+
+	is_connect_to_rpi = FALSE;
 
 	video_receive = g_thread_new("video_receive_main", &_video_receive_main, app_data->video_receive_data);
 	receive_audio = g_thread_new("receive audio", &_receive_audio_main, app_data->receive_audio_data);
 	send_audio = g_thread_new("send_audio", &_send_audio_main, app_data->send_audio_data);
-	text_receive = g_thread_new("text_receive_main", &_text_receive_main, app_data->text);
+	text_receive = g_thread_new("text_receive_main", &controller, app_data->text);
 
 	g_main_loop_run (app_data->video_receive_data->main_loop);
 
@@ -172,10 +181,10 @@ void check_initialization_complete (CustomData *data) {
   GST_CUSTOM_DATA *app_data;
 
   /* Gathering flag for each thread */
-  	video_receive_gathering_done = FALSE;
-  	send_audio_gathering_done = FALSE;
-  	receive_audio_gathering_done = FALSE;
-  	controller_gathering_done = FALSE;
+   (*video_receive_gathering_done) = FALSE;
+  	*send_audio_gathering_done = FALSE;
+	(*receive_audio_gathering_done) = FALSE;
+  	(*controller_gathering_done) = FALSE;
 
 //  /* close socket */
 //  shutdown(global_socket, 2);

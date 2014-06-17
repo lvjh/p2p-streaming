@@ -3,7 +3,7 @@
     <string name="app_name">Libnice Streaming</string>
     <string name="button_play">Play</string>
     <string name="button_stop">Stop</string>
-    <string name="Refresh">Refresh</string>
+    <string name="SignOut">SignOut</string>
     <string name="Register"><u>Register for new user</u></string>
     <string name="Temperature">Temperature:</string>
     <string name="Location">Location:</string>

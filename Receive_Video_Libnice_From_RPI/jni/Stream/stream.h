@@ -23,6 +23,7 @@
 #include <pthread.h>
 #include "../GstLibnice/gstnice.h"
 #include "../utils/base64.h"
+#include "../Login/login.h"
 
 #ifndef _GLOBAL_INFO
 #define _GLOBAL_INFO
@@ -56,12 +57,13 @@ GMainLoop *gloop;
 GIOChannel* io_stdin;
 jmethodID set_message_from_rpi;
 jfieldID name_field_id;
-gboolean video_receive_gathering_done;
-gboolean send_audio_gathering_done;
-gboolean receive_audio_gathering_done;
-gboolean controller_gathering_done;
+gboolean *video_receive_gathering_done;
+gboolean *send_audio_gathering_done;
+gboolean *receive_audio_gathering_done;
+gboolean *controller_gathering_done;
 gchar *client_name;
 gchar *rpi_name;
+gboolean is_connect_to_rpi;
 
 #define STUNSR_ADDR  "107.23.150.92"
 #define STUNSR_PORT 3478
@@ -142,7 +144,7 @@ static void _text_receive_cb_new_selected_pair(NiceAgent *agent, guint stream_id
 static gboolean _text_receive_stdin_send_data_cb (GIOChannel *source, GIOCondition cond,
     gpointer data);
 
-void*  _text_receive_main(CustomData *data);
+void*  controller (CustomData *data);
 
 void gst_native_send_text (JNIEnv* env, jobject thiz, jstring text);
 void gst_native_init_receive_text (JNIEnv* env, jobject obj);

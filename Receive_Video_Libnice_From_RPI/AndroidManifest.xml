@@ -3,7 +3,7 @@
       package="com.gst_sdk_tutorials.tutorial_3"
       android:versionCode="1"
       android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="14"/>
+    <uses-sdk android:minSdkVersion="13" android:targetSdkVersion="19"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -21,16 +21,24 @@
          <activity 
              android:name="com.gst_sdk_tutorials.tutorial_3.ClientState" 
              android:theme="@style/MyTheme"
-             android:screenOrientation="portrait">
+             android:screenOrientation="portrait"
+             android:label="Camera List"
+             android:icon="@drawable/icon_camera" >
         </activity>
         
          <activity 
-             android:name=".Login">
-             <intent-filter>
+             android:name=".Login" >
+             
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
         </activity>
+        
+         <activity 
+             android:name=".SignUp" >
+         </activity>
         
     </application>
 </manifest> 

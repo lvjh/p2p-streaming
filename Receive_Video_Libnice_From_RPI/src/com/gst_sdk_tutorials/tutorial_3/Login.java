@@ -4,19 +4,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 /**
  * Login to server
@@ -39,6 +35,8 @@ public class Login extends Activity
 	
 	private DialogFragment dialog;
 	
+	private TextView mTvRegister;
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -56,6 +54,19 @@ public class Login extends Activity
 		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 		mUsername.setText(sharedPref.getString("USERNAME", null));
 		mPassword.setText(sharedPref.getString("PASSWORD", null));
+		
+		/*
+		 * Register new user
+		 */
+		mTvRegister = (TextView) findViewById(R.id.tv_register);
+		mTvRegister.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent (getBaseContext(), SignUp.class);
+				startActivity(intent);
+			}
+		});
 	}
 	
 	
@@ -82,8 +93,6 @@ public class Login extends Activity
 			Intent intent = new Intent(this, ClientState.class);
 			intent.putExtra("username", mUsername.getText().toString());
 			startActivity(intent);
-			finish();
-			
 			break;
 			
 		case LOGIN_WRONG_USERINPUT:
@@ -137,7 +146,7 @@ public class Login extends Activity
 	        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 	        builder.setMessage(mMessage);
 	        builder.setTitle("Error");
-	        builder.setPositiveButton("Ok", new OnClickListener() {
+	        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {

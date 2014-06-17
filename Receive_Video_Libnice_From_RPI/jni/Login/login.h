@@ -22,10 +22,12 @@
 int global_socket;
 
 int connect_with_timeout(char *host, int port, int timeout_sec,
-		int timeout_usec, char *account);
+							int timeout_usec, char *account);
 
-int login_to_server (JNIEnv *env, jobject thiz, jstring _username, jstring _password);
+int login_to_server (JNIEnv *env, jobject thiz,
+						jstring _username, jstring _password);
 
-jstring list_online_client(JNIEnv *env, jobject thiz, jstring _username);
+jstring list_online_client(JNIEnv *env, jobject thiz,
+							jstring _username);
 
 #endif /* LOGIN_H_ */

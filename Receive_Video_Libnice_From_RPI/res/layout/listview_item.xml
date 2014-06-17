@@ -22,9 +22,8 @@
         android:text="Connect"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:background="@drawable/button_state" 
         android:padding="10dp"
-        android:textColor="#ffffff" />
+        android:textColor="#eeeeee" />
      
     <TextView 
         android:id="@+id/tv_client_name"

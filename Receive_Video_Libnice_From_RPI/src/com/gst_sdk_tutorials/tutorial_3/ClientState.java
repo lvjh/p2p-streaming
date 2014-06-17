@@ -1,7 +1,6 @@
 package com.gst_sdk_tutorials.tutorial_3;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
@@ -10,9 +9,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ExpandableListView;
-
-import com.gst_sdk_tutorials.tutorial_3.R;
+import android.support.v4.app.NavUtils;
 
 /**
  * Using listview to show clients's state 
@@ -47,6 +46,9 @@ public class ClientState extends Activity {
 		Intent intent = getIntent();
 		mUserName = intent.getStringExtra("username");
 		
+		/* Enable add UP action into ActionBar */
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
 		mListView = (ExpandableListView) findViewById(R.id.lvExp);
 		mAdapter = new ClientAdapter(this, mParent, mUserName);
 		mListView.setAdapter(mAdapter);
@@ -63,6 +65,21 @@ public class ClientState extends Activity {
 	}
 	
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			nativeCloseSocket();
+			Intent intent = new Intent(this, Login.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+	        NavUtils.navigateUpTo(this, intent);
+	        return true;
+			
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
 	protected void onResume() {
 		super.onResume();
 		
@@ -71,7 +88,7 @@ public class ClientState extends Activity {
 		/*
 		 * Start list client state thread
 		 */
-		mListClientStateThread = new ListClientState(this);
+		mListClientStateThread = new ListClientState();
 		mListClientStateThread.start();
 	}
 	
@@ -119,12 +136,6 @@ public class ClientState extends Activity {
 
 		private boolean mIsRunning = true;
 		
-		private Activity mActivity;
-		
-		public ListClientState(Activity activity) {
-			this.mActivity = activity;
-		}
-		
 		@Override
 		public void run() {
 			try {
@@ -162,9 +173,7 @@ public class ClientState extends Activity {
 						
 						if (clients[i].toLowerCase(Locale.getDefault()).contains("online")) {
 							mParent.add(new Client(parts[0], Client.ONLINE));
-							mParent.add(new Client(parts[0], Client.ONLINE));
 						} else {
-							mParent.add(new Client(parts[0], Client.OFFLINE));
 							mParent.add(new Client(parts[0], Client.OFFLINE));
 						}
 					}

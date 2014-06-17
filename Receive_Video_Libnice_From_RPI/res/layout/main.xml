@@ -7,95 +7,75 @@
 	        android:id="@+id/surface_video"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"/>
-    	
-	<RelativeLayout 
+
+	<RelativeLayout
 	    android:layout_width="match_parent"
-	    android:layout_height="match_parent">
-	  <!--  <TextView
-   	      android:id="@+id/textview_message"
-   	      android:textSize="20dp"
-   	      android:layout_width="match_parent"
-   	      android:layout_height="wrap_content"/>  
-   	      
-   	  	<Button 
-		  android:id="@+id/piezoBtn"
-   	      android:layout_width="wrap_content"
-   	      android:layout_height="wrap_content"
-   	      android:text="piezo"
-   	      android:onClick="PiezoOnClick"
-   	      android:layout_below="@+id/textview_message"/> 
-   	      
-   	   <Button 
-   	       android:layout_width="wrap_content"
-   	       android:layout_height="wrap_content"
-   	       android:text="Pump"
-   	       android:onClick="PumpOnclickListener"
-   	       android:layout_below="@id/piezoBtn"/>
-   	       -->
-   	      <Button 
-   	          android:id="@+id/settingbtn"
-   	          android:layout_width="wrap_content"
-   	          android:layout_height="wrap_content"
-   	          android:background="@drawable/setting"
-   	          android:onClick="SettingOnclickListener"/>
-   	      
-  	  	  <RelativeLayout 
-  	  	      android:layout_width="200dp"
-  	  	      android:layout_height="200dp"
-  	  	      android:layout_below="@id/settingbtn"
-  	  	      android:layout_marginTop="10dp"
-  			  android:background="@drawable/settingbackground"
-  			  android:id="@+id/settingLayout">
-  			  
-		      <TextView
-		      android:id="@+id/textview_message"
-		      android:textSize="15dp"
-		      android:layout_width="match_parent"
-		      android:layout_height="wrap_content"
-		      android:text="Temperature = 50 oC"
-		      android:layout_marginTop="20dp"
-		      android:layout_marginLeft="20dp"
-		      android:textColor="#ffffff"
-		      />  
-   	      
-   	  		<Button
-   	  		    android:id="@+id/piezoBtn"
-   	  		    android:layout_width="125dp"
-   	  		    android:layout_height="40dp"
-   	  		    android:layout_below="@+id/textview_message"
-   	  		    android:onClick="PiezoOnClick"
-   	  		    android:text="PIEZOSIREN" 
-   	  		    android:layout_marginTop="10dp"
-   	  		    android:layout_marginLeft="20dp"
-   	  		    android:background="@drawable/dialog_bg"/>
-		   	      
-	   	   <Button 
-	   	       android:layout_width="125dp"
-	   	       android:layout_height="40dp"
-	   	       android:text="PUMP"
-	   	       android:onClick="PumpOnclickListener"
-	   	       android:layout_below="@id/piezoBtn"
-	   	       android:layout_marginTop="10dp"
-	   	       android:layout_marginLeft="20dp"
-	   	       android:background="@drawable/dialog_bg"/>
-	   	   
-  	  	  </RelativeLayout>
+	    android:layout_height="match_parent" >
 
-  	  	  <ProgressBar
-  	  	      android:id="@+id/progressBar1"
-  	  	      android:layout_width="wrap_content"
-  	  	      android:layout_height="wrap_content"
-  	  	      android:layout_centerHorizontal="true"
-  	  	      android:layout_centerVertical="true"
-  	  	      style="?android:attr/progressBarStyleLarge"/>
+	    <Button
+	        android:id="@+id/settingbtn"
+	        android:layout_width="50dp"
+	        android:layout_height="50dp"
+	        android:background="@drawable/settings_blue"
+	        android:onClick="SettingOnclickListener" />
 
-  	  	  <ImageView
-  	  	      android:id="@+id/imv_back"
-  	  	      android:layout_width="60dp"
-  	  	      android:layout_height="60dp"
-  	  	      android:layout_alignParentBottom="true"
-  	  	      android:layout_alignParentLeft="true"
-  	  	      android:src="@drawable/back_icon" />
+	    <RelativeLayout
+	        android:id="@+id/settingLayout"
+	        android:layout_width="200dp"
+	        android:layout_height="200dp"
+	        android:layout_below="@id/settingbtn"
+	        android:layout_marginTop="10dp"
+	        android:background="@drawable/settingbackground" >
+
+	        <TextView
+	            android:id="@+id/textview_message"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="20dp"
+	            android:layout_marginTop="20dp"
+	            android:text="Temperature = 50 oC"
+	            android:textColor="#ffffff"
+	            android:textSize="15dp" />
+
+	        <Button
+	            android:id="@+id/piezoBtn"
+	            android:layout_width="125dp"
+	            android:layout_height="40dp"
+	            android:layout_below="@+id/textview_message"
+	            android:layout_marginLeft="20dp"
+	            android:layout_marginTop="10dp"
+	            android:background="@drawable/dialog_bg"
+	            android:onClick="PiezoOnClick"
+	            android:text="PIEZOSIREN" />
+
+	        <Button
+	            android:layout_width="125dp"
+	            android:layout_height="40dp"
+	            android:layout_below="@id/piezoBtn"
+	            android:layout_marginLeft="20dp"
+	            android:layout_marginTop="10dp"
+	            android:background="@drawable/dialog_bg"
+	            android:onClick="PumpOnclickListener"
+	            android:text="PUMP" />
+	    </RelativeLayout>
+
+	    <ProgressBar
+	        android:id="@+id/progressBar1"
+	        style="?android:attr/progressBarStyleLarge"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerHorizontal="true"
+	        android:layout_centerVertical="true" />
+
+	    <ImageView
+	        android:id="@+id/imv_back"
+	        android:layout_width="48dp"
+	        android:layout_height="48dp"
+	        android:layout_alignParentBottom="true"
+	        android:layout_alignParentLeft="true"
+	        android:layout_marginLeft="10dp"
+	        android:layout_marginBottom="10dp"
+	        android:src="@drawable/back_blue_icon" />
 
 	</RelativeLayout>
    	  
